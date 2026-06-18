@@ -52,11 +52,18 @@ def main():
     ap.add_argument("--mode", default="live", choices=["live", "gtbox"])
     ap.add_argument("--data-root", default="data/MOT")
     ap.add_argument("--device", default="cuda")
+    ap.add_argument("--bodyreid", action="store_true",
+                    help="run the standalone body-REID identity system alongside the tracker")
     args = ap.parse_args()
 
     for seq in args.sequences:
+        body_reid = None
+        if args.bodyreid:
+            from bodyreid import BodyReidRunner   # fresh per-sequence state
+            body_reid = BodyReidRunner()
         try:
-            run_sequence(args.detector, args.reid, seq, args.mode, args.data_root, args.device)
+            run_sequence(args.detector, args.reid, seq, args.mode, args.data_root,
+                         args.device, body_reid=body_reid)
         except Exception as exc:
             print("ERROR %s: %r" % (seq, exc))
 
