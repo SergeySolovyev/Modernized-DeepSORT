@@ -1,0 +1,9 @@
+detector:
+  name: gt
+  # Ground-truth "detector" — returns GT boxes for the current frame. Used for
+  # REID-only HOTA (SORT detection disabled) and as the P/R/F1 reference.
+  gt_file: null            # auto-set to <sequence>/gt/gt.txt when omitted
+  conf: 1.0
+  person_class_id: 1       # MOT gt: class 1 = pedestrian (ignored for MOT15-style gt)
+  min_visibility: 0.0      # drop GT boxes below this visibility (MOT16 col 9)
+  pedestrian_classes: [1]  # MOT16 eval keeps class 1; set [] to keep all classes

@@ -1,0 +1,24 @@
+# Global defaults. Detector/REID presets and sequence overrides merge on top.
+device: cuda
+
+paths:
+  data_root: data/MOT            # MOT sequences live at <data_root>/<SEQ>/{img1,gt,seqinfo.ini}
+  results_root: results          # MOT-format tracker outputs
+  trackeval_root: third_party/TrackEval
+
+tracker:
+  max_cosine_distance: 0.2       # appearance gating threshold (cosine)
+  nn_budget: 100                 # appearance gallery size per track
+  max_iou_distance: 0.7
+  max_age: 30                    # frames a track survives without a match
+  n_init: 3                      # detections before a track is confirmed
+  nms_max_overlap: 1.0           # >=1.0 disables our NMS (detectors NMS internally)
+  min_confidence: 0.0            # detector's own `conf` already filters
+  min_detection_height: 0
+
+# Selected by --detector / --reid presets; placeholders so a bare run still resolves.
+detector:
+  name: yolo
+reid:
+  name: torchreid
+  crop_pad: 0.0                  # fractional padding added around each crop before REID

@@ -1,0 +1,7 @@
+reid:
+  name: torchreid
+  model_name: osnet_x1_0    # 512-d, lightweight omni-scale net (KaiyangZhou/deep-person-reid)
+  weights: null             # null -> torchreid downloads ImageNet/REID-pretrained weights
+  input_size: [256, 128]    # (h, w)
+  batch_size: 64
+  crop_pad: 0.0

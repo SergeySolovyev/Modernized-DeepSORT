@@ -1,0 +1,9 @@
+detector:
+  name: yolo_seg
+  weights: yolov8m-seg.pt   # instance segmentation; auto-downloaded by ultralytics
+  conf: 0.25
+  iou: 0.7
+  imgsz: 1280
+  half: true
+  person_class_id: 0
+  mask_to_bbox: true        # derive a tight bbox from the person mask instead of the det box

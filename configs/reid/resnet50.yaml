@@ -1,0 +1,7 @@
+reid:
+  name: torchreid
+  model_name: resnet50      # 2048-d, heavier baseline (REID-trained backbone)
+  weights: null
+  input_size: [256, 128]
+  batch_size: 32
+  crop_pad: 0.0

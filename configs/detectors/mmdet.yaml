@@ -1,0 +1,8 @@
+detector:
+  name: mmdet
+  # Installed via openmim (mim install mmengine mmcv mmdet). `model` is an mmdet
+  # alias resolvable by DetInferencer, OR a path to a config file.
+  model: rtmdet_tiny_8xb32-300e_coco   # fast, pure-python; faster_rcnn_r50_fpn_1x_coco for accuracy
+  weights: null                         # null -> let mim/DetInferencer fetch the checkpoint
+  conf: 0.3
+  person_class_id: 0                    # COCO person

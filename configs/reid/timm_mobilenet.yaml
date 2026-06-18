@@ -1,0 +1,7 @@
+reid:
+  name: timm                      # second REID source: a generic timm backbone (no REID head)
+  model_name: mobilenetv3_large_100   # fast; global-pooled embedding, L2-normalized
+  weights: null                  # ImageNet-pretrained
+  input_size: [256, 128]
+  batch_size: 64
+  crop_pad: 0.0

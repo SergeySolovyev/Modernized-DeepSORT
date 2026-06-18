@@ -133,6 +133,7 @@ class NearestNeighborDistanceMetric(object):
         self.matching_threshold = matching_threshold
         self.budget = budget
         self.samples = {}
+        self._feature_dim = None  # modernization: set on first fit (see partial_fit)
 
     def partial_fit(self, features, targets, active_targets):
         """Update the distance metric with new data.
@@ -147,6 +148,22 @@ class NearestNeighborDistanceMetric(object):
             A list of targets that are currently present in the scene.
 
         """
+        # --- modernization: feature-dimension guard ---------------------------
+        # The cosine metric is dimension-agnostic, so REID models of different
+        # output size (128 / 512 / 2048) all work unchanged. This guard catches
+        # the *mistake* of mixing feature dimensions within one run (e.g.
+        # switching REID mid-sequence), which would otherwise corrupt the
+        # appearance gallery silently.
+        feats = np.asarray(features)
+        if feats.ndim == 2 and feats.shape[0] > 0:
+            if self._feature_dim is None:
+                self._feature_dim = int(feats.shape[1])
+            elif int(feats.shape[1]) != self._feature_dim:
+                raise ValueError(
+                    "Appearance feature dim changed from %d to %d within a run; "
+                    "do not switch REID models mid-sequence."
+                    % (self._feature_dim, int(feats.shape[1])))
+        # ----------------------------------------------------------------------
         for feature, target in zip(features, targets):
             self.samples.setdefault(target, []).append(feature)
             if self.budget is not None:

@@ -1,0 +1,8 @@
+detector:
+  name: yolo
+  weights: yolov8m.pt      # auto-downloaded by ultralytics; try yolov8s.pt for more FPS
+  conf: 0.25
+  iou: 0.7                 # ultralytics internal NMS IoU
+  imgsz: 1280
+  half: true
+  person_class_id: 0       # COCO person

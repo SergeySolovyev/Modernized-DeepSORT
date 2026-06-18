@@ -87,3 +87,21 @@ ENV/
 
 # Rope project settings
 .ropeproject
+
+# --- modernized DeepSORT additions ---
+# Datasets & model weights (downloaded at runtime; not versioned)
+data/MOT/
+third_party/
+*.pt
+*.pth
+*.pb
+*.onnx
+*.weights
+
+# Bulk run outputs (regeneratable). NOTE: the experiment journal
+# (results/experiments.csv) and report figures ARE versioned for traceability.
+results/**/*.txt
+results/**/*.mp4
+results/**/*.avi
+overlays/
+runs/
