@@ -29,6 +29,7 @@ class YoloSegDetector(BaseDetector):
             frame_bgr, conf=self.conf, iou=self.iou, imgsz=self.imgsz,
             classes=[self.person_class_id], device=self.device,
             half=self.half, verbose=False,
+            retina_masks=True,   # masks at original frame HxW (not letterboxed square)
         )
         r = results[0]
         if r.boxes is None or len(r.boxes) == 0:
@@ -40,7 +41,8 @@ class YoloSegDetector(BaseDetector):
 
         masks_full = None
         if r.masks is not None:
-            # r.masks.data: (N, mh, mw) in [0,1] at mask resolution -> resize to frame.
+            # With retina_masks=True, r.masks.data is binary uint8 (0/1) at the
+            # original frame HxW; resize is then a safe no-op (kept for robustness).
             md = r.masks.data.cpu().numpy()
             masks_full = np.zeros((md.shape[0], h, w), dtype=bool)
             for i in range(md.shape[0]):

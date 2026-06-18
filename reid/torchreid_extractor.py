@@ -36,7 +36,9 @@ class TorchreidExtractor(BaseReIDExtractor):
         )
 
     def _extract_raw(self, patches):
-        rgb = [p[:, :, ::-1] for p in patches]      # BGR -> RGB
+        # BGR -> RGB; ascontiguousarray because torchreid feeds each array to
+        # torch.from_numpy (via ToPILImage), which rejects negative-stride views.
+        rgb = [np.ascontiguousarray(p[:, :, ::-1]) for p in patches]
         feats = []
         for i in range(0, len(rgb), self.batch_size):
             out = self.extractor(rgb[i:i + self.batch_size])
