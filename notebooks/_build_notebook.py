@@ -26,12 +26,12 @@ cells = [
        "**Instructions:** set `REPO_URL`, Runtime → GPU, then Run all. Results are logged to "
        "`results/experiments.csv`; overlays to `overlays/`."),
 
-    code("# 1) Clone the repo (edit REPO_URL to your fork) and enter it\n"
-         "REPO_URL = 'https://github.com/<USER>/<REPO>.git'\n"
+    code("# 1) Clone the repo and enter it (public repo -> no auth; if private, use a PAT URL)\n"
+         "REPO_URL = 'https://github.com/SergeySolovyev/Modernized-DeepSORT.git'\n"
          "import os\n"
-         "if not os.path.isdir('deep_sort_modern'):\n"
-         "    !git clone $REPO_URL deep_sort_modern\n"
-         "%cd deep_sort_modern"),
+         "if not os.path.isdir('Modernized-DeepSORT'):\n"
+         "    !git clone $REPO_URL Modernized-DeepSORT\n"
+         "%cd Modernized-DeepSORT"),
 
     code("# 2) Install dependencies\n"
          "!pip -q install -r requirements-modern.txt\n"
