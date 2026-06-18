@@ -1,0 +1,5 @@
+reid:
+  name: boxmot                       # domain-generalizable OSNet-AIN via boxmot
+  weights: osnet_ain_x1_0_msmt17.pt  # auto-downloaded; 512-d
+  half: false
+  crop_pad: 0.0

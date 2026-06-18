@@ -6,6 +6,7 @@ _REGISTRY = {}
 # name -> module that defines & registers the adapter (imported on demand).
 _MODULE_BY_NAME = {
     "torchreid": "reid.torchreid_extractor",
+    "boxmot": "reid.boxmot_extractor",
     "timm": "reid.timm_extractor",
     "fastreid": "reid.fastreid_extractor",
     "mars": "reid.mars_extractor",

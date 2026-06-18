@@ -7,7 +7,7 @@ notebook preserves the "organized scripts, not notebooks" scoring point.
 import json
 import os
 
-DET, REID = "yolo", "osnet_x1_0"   # default best combo (tune per video)
+DET, REID = "yolo", "osnet"   # default best combo (OSNet via boxmot; tune per video)
 
 
 def md(text):
@@ -33,11 +33,9 @@ cells = [
          "    !git clone $REPO_URL Modernized-DeepSORT\n"
          "%cd Modernized-DeepSORT"),
 
-    code("# 2) Install dependencies\n"
+    code("# 2) Install dependencies (OSNet REID comes from boxmot — torchreid won't build on current Colab)\n"
          "!pip -q install -r requirements-modern.txt\n"
-         "# torchreid (OSNet/ResNet50) is not on PyPI under this name -> install from source:\n"
-         "!pip -q install git+https://github.com/KaiyangZhou/deep-person-reid.git\n"
-         "!pip -q install -U openmim && mim install mmengine 'mmcv>=2.0' mmdet\n"
+         "!pip -q install -U openmim && mim install mmengine 'mmcv>=2.0' mmdet   # optional 3rd detector\n"
          "!git clone -q https://github.com/JonathonLuiten/TrackEval third_party/TrackEval || true\n"
          "!pip -q install -e third_party/TrackEval"),
 
@@ -60,7 +58,7 @@ cells = [
          "    !python -m eval.det_eval --detector $det --device cuda"),
 
     md("## REID study — REID-only HOTA (GT boxes, SORT detection disabled)"),
-    code("!python -m eval.reid_eval --reids osnet_x1_0 osnet_ain_x1_0 resnet50 timm_mobilenet mars --device cuda"),
+    code("!python -m eval.reid_eval --reids osnet osnet_fast osnet_ain timm_mobilenet --device cuda"),
 
     md("## Full pipeline — best combo, live tracking → HOTA"),
     code("DET, REID = '%s', '%s'\n" % (DET, REID) +

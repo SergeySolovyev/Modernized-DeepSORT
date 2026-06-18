@@ -21,8 +21,9 @@ torchvision>=0.15
 # torchreid: KaiyangZhou/deep-person-reid is NOT on PyPI under this name (PyPI 'torchreid'
 # is an unrelated 0.0.x package). Install from source:
 #   pip install git+https://github.com/KaiyangZhou/deep-person-reid.git
+boxmot>=10.0               # PRIMARY REID source on Colab: clean-install OSNet weights
 timm>=0.9                  # second REID source (generic backbones)
-gdown                      # torchreid pretrained-weight downloads
+gdown                      # weight downloads
 # fastreid                 # optional extra source (JDAI-CV/fast-reid) — install from source
 
 # --- standalone body-REID index (optional, falls back to numpy brute force) ---

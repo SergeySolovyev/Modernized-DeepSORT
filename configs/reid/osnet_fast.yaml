@@ -1,0 +1,5 @@
+reid:
+  name: boxmot                       # fast OSNet via boxmot — for the >=5 FPS real-time combo
+  weights: osnet_x0_25_msmt17.pt     # auto-downloaded; tiny OSNet, fastest
+  half: false
+  crop_pad: 0.0

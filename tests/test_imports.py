@@ -12,13 +12,14 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 HEAVY = {"cv2", "torch", "torchvision", "ultralytics", "mmdet", "mmcv",
-         "mmengine", "nanodet", "torchreid", "timm", "tensorflow", "fastreid", "faiss"}
+         "mmengine", "nanodet", "torchreid", "boxmot", "timm", "tensorflow",
+         "fastreid", "faiss"}
 
 ADAPTERS = [
     "detectors.yolo_detector", "detectors.yolo_seg_detector", "detectors.gt_detector",
     "detectors.mmdet_detector", "detectors.nanodet_detector",
-    "reid.torchreid_extractor", "reid.timm_extractor", "reid.mars_extractor",
-    "reid.fastreid_extractor", "pipeline.frame_source",
+    "reid.torchreid_extractor", "reid.boxmot_extractor", "reid.timm_extractor",
+    "reid.mars_extractor", "reid.fastreid_extractor", "pipeline.frame_source",
 ]
 
 

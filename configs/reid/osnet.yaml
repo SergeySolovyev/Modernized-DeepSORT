@@ -1,0 +1,5 @@
+reid:
+  name: boxmot                       # clean-install OSNet via boxmot (torchreid won't build on Colab)
+  weights: osnet_x1_0_msmt17.pt      # auto-downloaded; 512-d OSNet trained on MSMT17
+  half: false
+  crop_pad: 0.0
