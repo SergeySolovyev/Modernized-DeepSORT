@@ -124,7 +124,22 @@ def main():
     ap.add_argument("--benchmark", required=True, choices=["MOT15", "MOT16"])
     ap.add_argument("--trackers", nargs="+", required=True)
     ap.add_argument("--trackeval-root", default="third_party/TrackEval")
+    ap.add_argument("--per-seq", action="store_true",
+                    help="evaluate per-sequence and journal HOTA (feeds eval.summarize's report table)")
     args = ap.parse_args()
+
+    if args.per_seq:
+        from eval.common import SEQ_BENCHMARK
+        seqs = [s for s in SEQ_BENCHMARK if SEQ_BENCHMARK[s] == args.benchmark]
+        for tracker in args.trackers:
+            try:
+                res = run_trackeval_per_seq(args.benchmark, tracker, seqs, args.trackeval_root)
+                for seq, m in res.items():
+                    print("%-28s %-16s HOTA=%.2f" % (tracker, seq, m.get("HOTA", float("nan"))))
+            except Exception as exc:
+                print("ERROR %s: %r" % (tracker, exc))
+        return
+
     res = run_trackeval(args.benchmark, args.trackers, args.trackeval_root)
     for tracker, m in res.items():
         print("%-28s HOTA=%.2f MOTA=%.2f IDF1=%.2f DetA=%.2f AssA=%.2f"
