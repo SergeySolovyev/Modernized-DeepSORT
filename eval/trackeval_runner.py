@@ -6,7 +6,9 @@ over the data layout produced by data/download_mot.py and eval/run_tracking.py.
   python -m eval.trackeval_runner --benchmark MOT15 --trackers yolo__osnet_x1_0
 """
 import argparse
+import glob
 import os
+import re
 import subprocess
 import sys
 
@@ -35,6 +37,23 @@ def _parse_summary(path):
     return out
 
 
+def _patch_trackeval_numpy(root):
+    """TrackEval uses np.float/np.int/np.bool, removed in numpy 2.x. Rewrite in place
+    so TrackEval runs on modern numpy (idempotent; word-boundaried to spare float64 etc.)."""
+    for path in glob.glob(os.path.join(root, "trackeval", "**", "*.py"), recursive=True):
+        try:
+            with open(path, encoding="utf-8") as fh:
+                src = fh.read()
+            new = re.sub(r"np\.float\b", "float", src)
+            new = re.sub(r"np\.int\b", "int", new)
+            new = re.sub(r"np\.bool\b", "bool", new)
+            if new != src:
+                with open(path, "w", encoding="utf-8") as fh:
+                    fh.write(new)
+        except Exception:
+            pass
+
+
 def run_trackeval(benchmark, trackers, trackeval_root="third_party/TrackEval",
                   metrics=("HOTA", "CLEAR", "Identity"), do_preproc=None):
     """Run TrackEval; return {tracker: {HOTA, MOTA, IDF1, DetA, AssA, ...}}.
@@ -47,6 +66,7 @@ def run_trackeval(benchmark, trackers, trackeval_root="third_party/TrackEval",
     script = os.path.join(trackeval_root, "scripts", "run_mot_challenge.py")
     if not os.path.exists(script):
         raise FileNotFoundError("TrackEval not found at %s (clone JonathonLuiten/TrackEval)" % script)
+    _patch_trackeval_numpy(trackeval_root)   # numpy 2.x compatibility
     if do_preproc is None:
         do_preproc = benchmark != "MOT15"   # MOT15 gt lacks preproc info
 
