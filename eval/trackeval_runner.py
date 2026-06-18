@@ -10,7 +10,10 @@ import os
 import subprocess
 import sys
 
+from eval import journal
 from eval.common import SPLIT, TE_GT, TE_TRACKERS, benchmark_split, seqmap_path
+
+_METRIC_KEYS = ("HOTA", "MOTA", "IDF1", "DetA", "AssA")
 
 
 def _parse_summary(path):
@@ -84,7 +87,11 @@ def run_trackeval_per_seq(benchmark, tracker, sequences, trackeval_root="third_p
             with open(seqmap, "w", encoding="utf-8") as fh:
                 fh.write("name\n%s\n" % seq)
             res = run_trackeval(benchmark, [tracker], trackeval_root)
-            out[seq] = res.get(tracker, {})
+            m = res.get(tracker, {})
+            out[seq] = m
+            journal.append_row({"component": "hota", "benchmark": benchmark,
+                                "tracker": tracker, "seq": seq,
+                                **{k: m.get(k) for k in _METRIC_KEYS}})
     finally:
         if backup is not None:
             with open(seqmap, "w", encoding="utf-8") as fh:
