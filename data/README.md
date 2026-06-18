@@ -10,6 +10,16 @@ python -m data.download_mot          # downloads 2DMOT2015 + MOT16, lays out:
 The six evaluation sequences (all TRAIN-split, GT available):
 MOT15 — TUD-Campus, TUD-Stadtmitte, KITTI-17, PETS09-S2L1 ; MOT16 — MOT16-09, MOT16-11.
 
+### MOT16 fallback (official site often unavailable)
+`motchallenge.net`'s MOT16 download is frequently unreachable. Use a mirror and point the
+script at the extracted folder (`--prefetched` searches it; nested layouts are fine):
+```bash
+pip install kagglehub
+python -c "import kagglehub; print(kagglehub.dataset_download('takshmandar/mot16-dataset'))"
+python -m data.download_mot --prefetched <printed_path>     # MOT15 still downloads normally
+```
+Or pass a direct mirror URL: `python -m data.download_mot --mot16-url https://.../MOT16.zip`.
+
 ## TrackEval (HOTA)
 ```bash
 git clone https://github.com/JonathonLuiten/TrackEval third_party/TrackEval

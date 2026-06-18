@@ -1,4 +1,8 @@
-"""Download the MOT15/MOT16 evaluation sequences and lay them out for TrackEval.
+"""Download/lay out the MOT15+MOT16 evaluation sequences for TrackEval.
+
+Robust to sources: tries a `--prefetched` directory first (e.g. an already-extracted
+Kaggle download), then falls back to downloading per-benchmark zips (URLs overridable).
+A failed download for one benchmark does not abort the others.
 
 Produces:
   data/MOT/<seq>/{img1,gt,seqinfo.ini}                         # runner reads here
@@ -8,9 +12,13 @@ Produces:
   data/trackeval/trackers/mot_challenge/                       # (filled by eval/run_tracking)
 
 Usage:
-  python -m data.download_mot                  # all six required sequences
-  python -m data.download_mot --keep-zip       # keep the downloaded archives
-Colab tip: large zips download faster with `!wget`; this script also works there.
+  python -m data.download_mot                                  # all six required sequences
+  python -m data.download_mot --prefetched ~/mot16_from_kaggle # use a manual download
+  python -m data.download_mot --mot16-url https://.../MOT16.zip
+Kaggle fallback for MOT16 (official site is often unavailable):
+  pip install kagglehub
+  python -c "import kagglehub; print(kagglehub.dataset_download('takshmandar/mot16-dataset'))"
+  python -m data.download_mot --prefetched <printed path>
 """
 import argparse
 import os
@@ -18,8 +26,7 @@ import shutil
 import urllib.request
 import zipfile
 
-from data.mot import (ALL_SEQUENCES, BENCHMARKS, DOWNLOAD_URLS, SEQUENCES,
-                      benchmark_of, save_registry, sequences_for)
+from data.mot import (ALL_SEQUENCES, DOWNLOAD_URLS, benchmark_of, save_registry)
 
 RAW_DIR = os.path.join("data", "raw")
 WORK_DIR = os.path.join("data", "MOT")
@@ -42,11 +49,14 @@ def _download(url, dest):
     print("\n  saved", dest)
 
 
-def _find_seq_dir(root, name):
-    """Locate <name>/ anywhere under root (handles train/ subfolders)."""
-    for dirpath, dirnames, _ in os.walk(root):
-        if os.path.basename(dirpath) == name and os.path.isdir(os.path.join(dirpath, "img1")):
-            return dirpath
+def _find_seq_dir(roots, name):
+    """Locate <name>/ (containing img1/) anywhere under any of `roots`."""
+    for root in roots:
+        if not root or not os.path.isdir(root):
+            continue
+        for dirpath, _dirnames, _files in os.walk(root):
+            if os.path.basename(dirpath) == name and os.path.isdir(os.path.join(dirpath, "img1")):
+                return dirpath
     return None
 
 
@@ -56,65 +66,87 @@ def _copytree(src, dst):
     shutil.copytree(src, dst)
 
 
-def setup(sequences, keep_zip=False):
+def setup(sequences, keep_zip=False, urls=None, prefetched=None):
+    urls = dict(DOWNLOAD_URLS, **(urls or {}))
+    prefetched = list(prefetched or [])
     os.makedirs(WORK_DIR, exist_ok=True)
     registry = {}
 
-    # 1) download + extract each needed benchmark once
     needed_benchmarks = sorted({benchmark_of(s) for s in sequences})
     for bench in needed_benchmarks:
-        url = DOWNLOAD_URLS[bench]
+        bench_seqs = [s for s in sequences if benchmark_of(s) == bench]
+        # If the prefetched dirs already contain every needed sequence, skip the download.
+        if all(_find_seq_dir(prefetched, s) for s in bench_seqs):
+            print("  %s: found in --prefetched, skipping download" % bench)
+            continue
+        url = urls[bench]
         zip_path = os.path.join(RAW_DIR, os.path.basename(url))
-        _download(url, zip_path)
         extract_root = os.path.join(RAW_DIR, bench)
-        if not os.path.isdir(extract_root):
-            print("  extracting", zip_path)
-            with zipfile.ZipFile(zip_path) as zf:
-                zf.extractall(extract_root)
-        if not keep_zip and os.path.exists(zip_path):
-            os.remove(zip_path)
+        try:
+            _download(url, zip_path)
+            if not os.path.isdir(extract_root):
+                print("  extracting", zip_path)
+                with zipfile.ZipFile(zip_path) as zf:
+                    zf.extractall(extract_root)
+            if not keep_zip and os.path.exists(zip_path):
+                os.remove(zip_path)
+            prefetched.append(extract_root)
+        except Exception as exc:   # one source down must not abort the rest
+            print("  WARNING: could not fetch %s from %s (%r).\n"
+                  "  Provide --prefetched <dir> with an extracted copy "
+                  "(e.g. Kaggle takshmandar/mot16-dataset for MOT16)." % (bench, url, exc))
 
-    # 2) place each sequence into data/MOT and the TrackEval GT layout
+    search_roots = prefetched + [os.path.join(RAW_DIR, b) for b in needed_benchmarks]
     for seq in sequences:
-        bench = benchmark_of(seq)
-        src = _find_seq_dir(os.path.join(RAW_DIR, bench), seq)
+        src = _find_seq_dir(search_roots, seq)
         if src is None:
-            print("  WARNING: could not find sequence %s under %s" % (seq, bench))
+            print("  WARNING: sequence %s not found in any source" % seq)
             continue
         work = os.path.join(WORK_DIR, seq)
         _copytree(src, work)
         registry[seq] = os.path.abspath(work)
 
-        # TrackEval GT: <BENCH>-train/<seq>/{gt,seqinfo.ini}
+        bench = benchmark_of(seq)
         te_seq = os.path.join(TE_GT, "%s-train" % bench, seq)
         os.makedirs(os.path.join(te_seq, "gt"), exist_ok=True)
-        if os.path.exists(os.path.join(src, "gt", "gt.txt")):
-            shutil.copy(os.path.join(src, "gt", "gt.txt"), os.path.join(te_seq, "gt", "gt.txt"))
-        if os.path.exists(os.path.join(src, "seqinfo.ini")):
-            shutil.copy(os.path.join(src, "seqinfo.ini"), os.path.join(te_seq, "seqinfo.ini"))
+        gt_src = os.path.join(src, "gt", "gt.txt")
+        if os.path.exists(gt_src):
+            shutil.copy(gt_src, os.path.join(te_seq, "gt", "gt.txt"))
+        ini_src = os.path.join(src, "seqinfo.ini")
+        if os.path.exists(ini_src):
+            shutil.copy(ini_src, os.path.join(te_seq, "seqinfo.ini"))
         print("  ready:", seq)
 
-    # 3) seqmaps per benchmark
     seqmap_dir = os.path.join(TE_GT, "seqmaps")
     os.makedirs(seqmap_dir, exist_ok=True)
     for bench in needed_benchmarks:
-        seqs = [s for s in sequences if benchmark_of(s) == bench]
+        seqs = [s for s in sequences if benchmark_of(s) == bench and s in registry]
         with open(os.path.join(seqmap_dir, "%s-train.txt" % bench), "w", encoding="utf-8") as fh:
             fh.write("name\n" + "\n".join(seqs) + "\n")
 
     os.makedirs(TE_TRACKERS, exist_ok=True)
     save_registry(registry)
-    print("\nregistry -> data/sequences.json (%d sequences)" % len(registry))
+    print("\nregistry -> data/sequences.json (%d/%d sequences ready)"
+          % (len(registry), len(sequences)))
 
 
 def parse_args():
     ap = argparse.ArgumentParser(description="Download MOT15/MOT16 eval sequences")
     ap.add_argument("--sequences", nargs="*", default=ALL_SEQUENCES,
                     help="subset of sequence names (default: all six)")
+    ap.add_argument("--prefetched", nargs="*", default=None,
+                    help="dirs to search for already-downloaded sequences (e.g. a Kaggle extract)")
+    ap.add_argument("--mot15-url", default=None, help="override the 2DMOT2015 zip URL")
+    ap.add_argument("--mot16-url", default=None, help="override the MOT16 zip URL")
     ap.add_argument("--keep-zip", action="store_true")
     return ap.parse_args()
 
 
 if __name__ == "__main__":
     args = parse_args()
-    setup(args.sequences, keep_zip=args.keep_zip)
+    url_overrides = {}
+    if args.mot15_url:
+        url_overrides["MOT15"] = args.mot15_url
+    if args.mot16_url:
+        url_overrides["MOT16"] = args.mot16_url
+    setup(args.sequences, keep_zip=args.keep_zip, urls=url_overrides, prefetched=args.prefetched)
