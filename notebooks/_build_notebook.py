@@ -88,7 +88,10 @@ cells = [
          "!python -m eval.make_overlays --detector $DET --reid $REID --sequence MOT16-09 --out overlays/best_MOT16-09.mp4 --device cuda"),
 
     md("## Results summary"),
-    code("import pandas as pd\n"
+    code("# Auto-build the per-video HOTA table (tracker x video + Mean, Delta vs baseline)\n"
+         "!python -m eval.summarize\n"
+         "import pandas as pd\n"
+         "print(open('report/results_table.md').read())\n"
          "df = pd.read_csv('results/experiments.csv')\n"
          "df.tail(40)"),
 ]
