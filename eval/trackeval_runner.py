@@ -33,15 +33,19 @@ def _parse_summary(path):
 
 
 def run_trackeval(benchmark, trackers, trackeval_root="third_party/TrackEval",
-                  metrics=("HOTA", "CLEAR", "Identity"), seqmap=None, do_preproc=None):
-    """Run TrackEval; return {tracker: {HOTA, MOTA, IDF1, DetA, AssA, ...}}."""
+                  metrics=("HOTA", "CLEAR", "Identity"), do_preproc=None):
+    """Run TrackEval; return {tracker: {HOTA, MOTA, IDF1, DetA, AssA, ...}}.
+
+    Uses TrackEval's DEFAULT seqmap at GT_FOLDER/seqmaps/<BENCH>-train.txt (written by
+    data/download_mot.py). We deliberately do NOT pass --SEQMAP_FILE: TrackEval registers
+    that arg with nargs='+', so an explicit value arrives as a list and crashes seqmap
+    handling (os.path.isfile(list) -> TypeError).
+    """
     script = os.path.join(trackeval_root, "scripts", "run_mot_challenge.py")
     if not os.path.exists(script):
         raise FileNotFoundError("TrackEval not found at %s (clone JonathonLuiten/TrackEval)" % script)
     if do_preproc is None:
         do_preproc = benchmark != "MOT15"   # MOT15 gt lacks preproc info
-    if seqmap is None:
-        seqmap = seqmap_path(benchmark)
 
     cmd = [sys.executable, script,
            "--BENCHMARK", benchmark, "--SPLIT_TO_EVAL", SPLIT,
@@ -49,7 +53,7 @@ def run_trackeval(benchmark, trackers, trackeval_root="third_party/TrackEval",
            "--TRACKERS_TO_EVAL", *trackers,
            "--METRICS", *metrics,
            "--USE_PARALLEL", "False", "--DO_PREPROC", str(bool(do_preproc)),
-           "--SEQMAP_FILE", seqmap, "--PRINT_RESULTS", "True"]
+           "--PRINT_RESULTS", "True"]
     print("[trackeval]", " ".join(cmd))
     subprocess.run(cmd, check=True)
 
@@ -62,23 +66,29 @@ def run_trackeval(benchmark, trackers, trackeval_root="third_party/TrackEval",
 
 
 def run_trackeval_per_seq(benchmark, tracker, sequences, trackeval_root="third_party/TrackEval"):
-    """Per-video HOTA by running TrackEval with a temp 1-sequence seqmap each time.
+    """Per-video HOTA: temporarily restrict the DEFAULT seqmap to one sequence per run.
 
-    Returns {seq: {HOTA, MOTA, IDF1, ...}}. Reliable per-video numbers for the report.
+    TrackEval auto-reads GT_FOLDER/seqmaps/<BENCH>-train.txt; since --SEQMAP_FILE can't be
+    passed safely, we overwrite that file with a single sequence (backing up + restoring the
+    original). Returns {seq: {HOTA, MOTA, IDF1, ...}} — reliable per-video numbers.
     """
     out = {}
-    seqmap_dir = os.path.join(TE_GT, "seqmaps")
-    os.makedirs(seqmap_dir, exist_ok=True)
-    for seq in sequences:
-        tmp = os.path.join(seqmap_dir, "_tmp_%s.txt" % seq)
-        with open(tmp, "w", encoding="utf-8") as fh:
-            fh.write("name\n%s\n" % seq)
-        try:
-            res = run_trackeval(benchmark, [tracker], trackeval_root, seqmap=tmp)
+    seqmap = seqmap_path(benchmark)
+    os.makedirs(os.path.dirname(seqmap), exist_ok=True)
+    backup = None
+    if os.path.exists(seqmap):
+        with open(seqmap, encoding="utf-8") as fh:
+            backup = fh.read()
+    try:
+        for seq in sequences:
+            with open(seqmap, "w", encoding="utf-8") as fh:
+                fh.write("name\n%s\n" % seq)
+            res = run_trackeval(benchmark, [tracker], trackeval_root)
             out[seq] = res.get(tracker, {})
-        finally:
-            if os.path.exists(tmp):
-                os.remove(tmp)
+    finally:
+        if backup is not None:
+            with open(seqmap, "w", encoding="utf-8") as fh:
+                fh.write(backup)
     return out
 
 
