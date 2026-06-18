@@ -20,11 +20,16 @@ SEQUENCES = {
 ALL_SEQUENCES = list(SEQUENCES.keys())
 BENCHMARKS = sorted(set(SEQUENCES.values()))
 
-# Default download URLs (overridable in download_mot.py).
+# Default download URLs (overridable via download_mot.py --mot15-url/--mot16-url).
+# motchallenge.net is frequently UNREACHABLE (confirmed from Colab: "Network is
+# unreachable"), so we default to the PaddleDetection (Baidu) mirror, which is reachable
+# and preserves the MOTChallenge layout (images/train/<seq>/{img1,gt,seqinfo.ini}).
 DOWNLOAD_URLS = {
-    "MOT15": "https://motchallenge.net/data/2DMOT2015.zip",
-    "MOT16": "https://motchallenge.net/data/MOT16.zip",
+    "MOT15": "https://bj.bcebos.com/v1/paddledet/data/mot/MOT15.zip",
+    "MOT16": "https://bj.bcebos.com/v1/paddledet/data/mot/MOT16.zip",
 }
+# Official source (often down): MOT15 https://motchallenge.net/data/2DMOT2015.zip,
+#                               MOT16 https://motchallenge.net/data/MOT16.zip
 
 _REGISTRY_FILE = os.path.join("data", "sequences.json")
 
