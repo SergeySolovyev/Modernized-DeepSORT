@@ -34,9 +34,11 @@ cells = [
          "%cd Modernized-DeepSORT\n"
          "!git pull -q   # always run the latest fixes"),
 
-    code("# 2) Install dependencies (OSNet REID comes from boxmot — torchreid won't build on current Colab)\n"
+    code("# 2) Install deps. Core first (must succeed); OSNet(boxmot)+mmdet are guarded so a\n"
+         "# build failure on a bleeding-edge runtime can't break the core pipeline (timm REID always works).\n"
          "!pip -q install -r requirements-modern.txt\n"
-         "!pip -q install -U openmim && mim install mmengine 'mmcv>=2.0' mmdet   # optional 3rd detector\n"
+         "!pip -q install boxmot || echo 'boxmot (OSNet) install failed -> timm REID will be used'\n"
+         "!pip -q install -U openmim && mim install mmengine 'mmcv>=2.0' mmdet || echo 'mmdet skipped'\n"
          "!git clone -q https://github.com/JonathonLuiten/TrackEval third_party/TrackEval || true\n"
          "!pip -q install -e third_party/TrackEval"),
 

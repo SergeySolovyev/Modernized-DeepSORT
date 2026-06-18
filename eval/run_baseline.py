@@ -14,8 +14,28 @@ nn_budget=100, min_confidence=0.3, nms_max_overlap=1.0).
 """
 import argparse
 import os
+import urllib.request
 
 import deep_sort_app
+
+# mars-small128.pb is no longer on the original Google Drive; this GitHub mirror is reachable.
+MARS_MIRROR = ("https://raw.githubusercontent.com/Qidian213/deep_sort_yolov3/"
+               "master/model_data/mars-small128.pb")
+
+
+def ensure_mars(path):
+    """Return True if mars-small128.pb is present, downloading it from a mirror if needed."""
+    if os.path.exists(path):
+        return True
+    try:
+        os.makedirs(os.path.dirname(os.path.abspath(path)) or ".", exist_ok=True)
+        print("downloading mars-small128.pb from mirror ...")
+        urllib.request.urlretrieve(MARS_MIRROR, path)
+        print("  saved", path)
+        return True
+    except Exception as exc:  # noqa: BLE001
+        print("Baseline SKIPPED: could not obtain mars-small128.pb (%r). See data/README.md." % exc)
+        return False
 from eval import journal
 from eval.common import EVAL_SEQUENCES, benchmark_of, tracker_result_path
 
@@ -34,10 +54,7 @@ def main():
     ap.add_argument("--nn-budget", type=int, default=100)
     args = ap.parse_args()
 
-    if not os.path.exists(args.mars):
-        print("Baseline SKIPPED: mars model not found at %s (see data/README.md).\n"
-              "  The modern configs run independently; provide mars-small128.pb to compute "
-              "the unmodified-DeepSORT baseline." % args.mars)
+    if not ensure_mars(args.mars):
         return
 
     # Lazy import (pulls in TensorFlow) so the module stays importable without TF.

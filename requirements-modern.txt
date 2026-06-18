@@ -21,8 +21,9 @@ torchvision>=0.15
 # torchreid: KaiyangZhou/deep-person-reid is NOT on PyPI under this name (PyPI 'torchreid'
 # is an unrelated 0.0.x package). Install from source:
 #   pip install git+https://github.com/KaiyangZhou/deep-person-reid.git
-boxmot>=10.0               # PRIMARY REID source on Colab: clean-install OSNet weights
-timm>=0.9                  # second REID source (generic backbones)
+# boxmot (OSNet REID) is installed SEPARATELY/guarded (see notebook): its heavy build-deps
+# (onnx/yolox) can fail egg_info on bleeding-edge runtimes, and must not abort this whole -r.
+timm>=0.9                  # REID source that always installs cleanly (the safe default)
 gdown                      # weight downloads
 # fastreid                 # optional extra source (JDAI-CV/fast-reid) — install from source
 
