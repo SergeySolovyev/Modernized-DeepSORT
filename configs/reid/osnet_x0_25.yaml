@@ -1,0 +1,7 @@
+reid:
+  name: torchreid
+  model_name: osnet_x0_25   # tiny OSNet (~512-d) — fastest REID, for the real-time combo
+  weights: null
+  input_size: [256, 128]
+  batch_size: 128
+  crop_pad: 0.0
