@@ -97,6 +97,15 @@ class TrackingRunner:
         overlay : callable(frame_idx, frame, tracks, det_result, track_to_id) | None
         """
         tracker = self._build_tracker()
+        # Warmup so reported FPS excludes one-time model-load / lazy-CUDA costs.
+        try:
+            self.detector.warmup(frame_source.image_size)
+        except Exception:
+            pass
+        try:
+            self.reid.warmup()
+        except Exception:
+            pass
         det_t = reid_t = trk_t = 0.0
         n = 0
         wall0 = time.perf_counter()

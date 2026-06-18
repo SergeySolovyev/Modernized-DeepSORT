@@ -34,6 +34,12 @@ def main():
     ap.add_argument("--nn-budget", type=int, default=100)
     args = ap.parse_args()
 
+    if not os.path.exists(args.mars):
+        print("Baseline SKIPPED: mars model not found at %s (see data/README.md).\n"
+              "  The modern configs run independently; provide mars-small128.pb to compute "
+              "the unmodified-DeepSORT baseline." % args.mars)
+        return
+
     # Lazy import (pulls in TensorFlow) so the module stays importable without TF.
     from tools import generate_detections as gd
 

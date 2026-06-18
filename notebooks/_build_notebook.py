@@ -31,7 +31,8 @@ cells = [
          "import os\n"
          "if not os.path.isdir('Modernized-DeepSORT'):\n"
          "    !git clone $REPO_URL Modernized-DeepSORT\n"
-         "%cd Modernized-DeepSORT"),
+         "%cd Modernized-DeepSORT\n"
+         "!git pull -q   # always run the latest fixes"),
 
     code("# 2) Install dependencies (OSNet REID comes from boxmot — torchreid won't build on current Colab)\n"
          "!pip -q install -r requirements-modern.txt\n"
