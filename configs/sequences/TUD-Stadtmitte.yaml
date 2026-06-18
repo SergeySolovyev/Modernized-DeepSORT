@@ -1,0 +1,8 @@
+# TUD-Stadtmitte (MOT15): 179 frames, ~640x480, street-level pedestrians, static cam.
+detector:
+  imgsz: 960
+  conf: 0.25
+tracker:
+  n_init: 3
+  max_age: 25
+  max_cosine_distance: 0.2

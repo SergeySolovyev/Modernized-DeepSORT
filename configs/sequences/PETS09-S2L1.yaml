@@ -1,0 +1,9 @@
+# PETS09-S2L1 (MOT15): 795 frames, ~768x576, crowded plaza, frequent occlusions, static cam.
+detector:
+  imgsz: 1280
+  conf: 0.3
+tracker:
+  n_init: 3
+  max_age: 20          # crowded -> shorter age limits ID drift across occlusions
+  max_cosine_distance: 0.2
+  nn_budget: 150       # many simultaneous identities

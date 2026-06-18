@@ -47,12 +47,11 @@ cells = [
     md("## Baseline — unmodified DeepSORT (provided detections + mars-small128)\n"
        "Faithful baseline via the original legacy path. Requires `mars-small128.pb` at "
        "`third_party/deep_sort_data/` (see data/README.md)."),
-    code("# 5) Baseline appearance features for the provided detections, then original tracker\n"
-         "# (uncomment once mars-small128.pb is in place)\n"
-         "# !python tools/generate_detections.py --model third_party/deep_sort_data/mars-small128.pb \\\n"
-         "#     --mot_dir data/MOT --output_dir data/baseline_npy\n"
-         "# Then run deep_sort_app per sequence into the TrackEval 'baseline' tracker folder and eval HOTA.\n"
-         "print('baseline: see data/README.md for the mars .pb, then run the legacy path above')"),
+    code("# 5) Baseline: unmodified DeepSORT (provided detections + mars-small128).\n"
+         "# Requires third_party/deep_sort_data/mars-small128.pb (see data/README.md).\n"
+         "!python -m eval.run_baseline --mars third_party/deep_sort_data/mars-small128.pb\n"
+         "!python -m eval.trackeval_runner --benchmark MOT15 --trackers baseline\n"
+         "!python -m eval.trackeval_runner --benchmark MOT16 --trackers baseline"),
 
     md("## Detector study — Precision / Recall / F1 vs GT (IoU≥0.5)"),
     code("for det in ['yolo', 'nanodet', 'mmdet']:\n"

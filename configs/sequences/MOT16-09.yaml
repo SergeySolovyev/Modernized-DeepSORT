@@ -1,0 +1,9 @@
+# MOT16-09 (MOT16): 525 frames, 1920x1080, indoor mall, medium density, static cam.
+detector:
+  imgsz: 1280
+  conf: 0.3
+tracker:
+  n_init: 3
+  max_age: 30
+  max_cosine_distance: 0.2
+  nn_budget: 100

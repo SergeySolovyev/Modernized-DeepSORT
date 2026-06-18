@@ -1,0 +1,9 @@
+# MOT16-11 (MOT16): 900 frames, 1920x1080, MOVING camera (mall), medium density.
+detector:
+  imgsz: 1280
+  conf: 0.3
+tracker:
+  n_init: 3
+  max_age: 40          # moving camera -> longer occlusions, keep tracks alive longer
+  max_cosine_distance: 0.25
+  nn_budget: 100

@@ -1,0 +1,8 @@
+# KITTI-17 (MOT15): 145 frames, ~1224x370 (wide), street from a vehicle, small targets.
+detector:
+  imgsz: 1280         # wide frame + small people -> keep resolution up
+  conf: 0.3
+tracker:
+  n_init: 3
+  max_age: 30
+  max_cosine_distance: 0.2

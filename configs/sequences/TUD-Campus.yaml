@@ -1,0 +1,9 @@
+# TUD-Campus (MOT15): 71 frames, ~640x480, dense crossing pedestrians, static cam.
+# Starting points — tune against HOTA/FPS.
+detector:
+  imgsz: 960          # low-res source; smaller net is faster with no quality loss
+  conf: 0.25
+tracker:
+  n_init: 2           # short clip -> confirm tracks faster
+  max_age: 20
+  max_cosine_distance: 0.2
