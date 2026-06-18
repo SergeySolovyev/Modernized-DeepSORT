@@ -34,7 +34,8 @@ models of any output size (128 / 512 / 2048) work unchanged.
 
 ```bash
 pip install -r requirements-modern.txt
-pip install -U openmim && mim install mmengine "mmcv>=2.0" mmdet   # for the mmdet detector
+pip install git+https://github.com/KaiyangZhou/deep-person-reid.git   # torchreid (OSNet/ResNet50) — not on PyPI
+pip install -U openmim && mim install mmengine "mmcv>=2.0" mmdet      # for the mmdet detector
 git clone https://github.com/JonathonLuiten/TrackEval third_party/TrackEval && pip install -e third_party/TrackEval
 ```
 See [data/README.md](data/README.md) for MOT data, NanoDet, and the mars baseline.

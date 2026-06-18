@@ -35,6 +35,8 @@ cells = [
 
     code("# 2) Install dependencies\n"
          "!pip -q install -r requirements-modern.txt\n"
+         "# torchreid (OSNet/ResNet50) is not on PyPI under this name -> install from source:\n"
+         "!pip -q install git+https://github.com/KaiyangZhou/deep-person-reid.git\n"
          "!pip -q install -U openmim && mim install mmengine 'mmcv>=2.0' mmdet\n"
          "!git clone -q https://github.com/JonathonLuiten/TrackEval third_party/TrackEval || true\n"
          "!pip -q install -e third_party/TrackEval"),

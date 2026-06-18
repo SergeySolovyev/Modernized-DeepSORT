@@ -18,9 +18,12 @@ ultralytics>=8.1           # YOLOv8/v11 detection + YOLOv8-seg segmentation
 # --- reid ---
 torch>=2.0
 torchvision>=0.15
-torchreid>=1.4             # OSNet / ResNet50 / MLFN  (KaiyangZhou/deep-person-reid)
+# torchreid: KaiyangZhou/deep-person-reid is NOT on PyPI under this name (PyPI 'torchreid'
+# is an unrelated 0.0.x package). Install from source:
+#   pip install git+https://github.com/KaiyangZhou/deep-person-reid.git
 timm>=0.9                  # second REID source (generic backbones)
-# fastreid                 # optional 2nd source (JDAI-CV/fast-reid) — install from source
+gdown                      # torchreid pretrained-weight downloads
+# fastreid                 # optional extra source (JDAI-CV/fast-reid) — install from source
 
 # --- standalone body-REID index (optional, falls back to numpy brute force) ---
 faiss-cpu>=1.7             # ANN index for the identity database

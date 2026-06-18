@@ -45,7 +45,7 @@ python -m data.prepare_gt_crops      # -> data/gt_crops/<seq>/<track_id>/<frame>
   ```
 
 ## REID backends
-- **torchreid** (`pip install torchreid`): osnet_x1_0 / osnet_ain_x1_0 / resnet50 — weights auto-download.
+- **torchreid** (`pip install git+https://github.com/KaiyangZhou/deep-person-reid.git` — NOT the PyPI `torchreid`, which is an unrelated package): osnet_x1_0 / osnet_ain_x1_0 / resnet50 — weights auto-download.
 - **timm** (`pip install timm`): generic backbone, ImageNet-pretrained.
 - **mars** (baseline): download the original deep_sort_data and place `mars-small128.pb` at
   `third_party/deep_sort_data/mars-small128.pb` (loaded via `tf.compat.v1`).
