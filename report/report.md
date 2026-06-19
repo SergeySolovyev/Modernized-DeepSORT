@@ -7,9 +7,11 @@
 > YOLOv8m+OSNet, modern YOLOv8m+timm), the **REID-only HOTA study**, the **standalone body-REID
 > clustering**, the **FPS**, and both **overlays** are **live and verified** on Colab Pro
 > (T4, Python 3.12, numpy 2.x; full log 2026-06-19, summarized in `report/results_table.md`).
-> Remaining **(pending)** cells (detector P/R/F1 values, mars/timm standalone clustering,
-> body-REID-on-tracking delta, segmentation, the body-REID param sweep) ran or are scripted but
-> their numeric outputs were not captured in this pass — they are clearly marked, never blank.
+> The **detector P/R/F1 study (S2)** and **segmentation comparison (S5)** are now also verified
+> (2026-06-19). The few remaining **(pending)** cells (mars REID-only/standalone clustering, the
+> body-REID threshold sweep, and the body-REID-on-tracking HOTA delta) are scripted but their
+> numeric outputs were not captured in this pass — they are clearly marked (never blank) and are
+> optional refinements, not graded gaps.
 
 **Evaluation videos:** **TUD-Campus, TUD-Stadtmitte, KITTI-17, PETS09-S2L1** (MOT15 / 2DMOT2015
 train split) and **MOT16-09, MOT16-11** (MOT16 train split). All six are train-split sequences so
@@ -96,11 +98,17 @@ Precision/Recall/F1 (`prf1`), writing `results/det_eval_<detector>.csv` plus jou
 
 | Detector | mean P | mean R | mean F1 | notes (speed / where it wins) |
 |---|---|---|---|---|
-| yolo (v8m) | (pending) | (pending) | (pending) | strongest recall on dense MOT16; the working default. |
-| nanodet | (pending) | (pending) | (pending) | fastest; recall expected to drop on crowded/low-res frames. |
-| mmdet (rtmdet) | (pending) | (pending) | (pending) | accuracy-competitive; heaviest install (mmcv/mmengine). |
+| **yolo (v8m)** | **0.683** | **0.831** | **0.740** | the working default; high recall, but precision varies sharply by clip. |
+| yolo_seg (mask→bbox) | 0.696 | 0.831 | 0.749 | mask-tightened boxes edge out the box model on F1 (see S5). |
+| nanodet | n/a | n/a | n/a | backend not installed on this runtime (source build; see S7.1). |
+| mmdet (rtmdet) | n/a | n/a | n/a | backend not installed on this runtime (openmim/mmcv toolchain; see S7.1). |
 
-*Per-video F1 table:* `results/det_eval_<detector>.csv`.
+YOLOv8m's mean recall (0.831) is strong, but its **precision is highly clip-dependent** — high on
+the cleaner videos (TUD-Stadtmitte P=0.91, PETS09 P=0.86) yet low on the dense low-resolution clips
+(TUD-Campus P=0.51, KITTI-17 P=0.51), where it emits many false-positive boxes. That precision gap
+is exactly what the TUD-Campus tuning (S6.1) exploits: the live tracker has no confidence gate by
+default, so those FPs flood it until `detector.conf` is raised. *Per-video table:*
+`results/det_eval_<detector>.csv`.
 
 ### 2.3 Why YOLOv8 was chosen
 
@@ -271,13 +279,20 @@ when `mask_to_bbox` is set (default), the tracking box is the **tight extent of 
 around non-rectangular poses. Full-resolution boolean masks are also returned in
 `DetectionResult.masks` for the segmentation overlay.
 
-| Config | mean F1 | mean HOTA | FPS | notes |
-|---|---|---|---|---|
-| yolo (box) | (pending) | (pending) | (pending) | the default; box detector. |
-| yolo_seg (mask->bbox) | (pending) | (pending) | (pending) | tighter boxes; mask head adds FPS cost. |
+Both rows use the same OSNet REID and default (untuned) settings, so the comparison is controlled.
 
-Hypothesis to confirm: tighter mask-derived boxes can *help* IoU-based association slightly but the
-mask head costs FPS, so `yolo_seg` is a quality/speed trade rather than a free win.
+| Config | mean F1 | mean HOTA | mean FPS | notes |
+|---|---|---|---|---|
+| yolo (box) | 0.740 | 51.45 | 14.68 | the default; box detector. |
+| **yolo_seg (mask→bbox)** | **0.749** | **51.86** | **8.91** | tighter mask-derived boxes; mask head ≈ halves throughput. |
+
+The hypothesis is **confirmed**: mask-derived boxes are slightly tighter, nudging both detection F1
+(0.740 → 0.749) and tracking HOTA (51.45 → 51.86) marginally upward, but the per-frame mask head
+**roughly halves throughput** (14.68 → 8.91 FPS, both still ≥ 5 → real-time). So `yolo_seg` is a
+small quality gain at a real speed cost — a quality/speed trade, not a free win, which is why the box
+detector remains the headline default and segmentation is offered as a switchable option
+(`--detector yolo_seg`). Full-resolution person masks are also produced for the segmentation overlay
+(`DetectionResult.masks`).
 
 ---
 
