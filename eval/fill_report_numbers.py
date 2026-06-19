@@ -13,7 +13,8 @@ import statistics
 import subprocess
 import sys
 
-DEVICE = sys.argv[1] if len(sys.argv) > 1 else "cuda"
+SUMMARY_ONLY = "summary" in sys.argv[1:]   # `python -m eval.fill_report_numbers summary` -> just reprint
+DEVICE = next((a for a in sys.argv[1:] if a != "summary"), "cuda")
 JOURNAL = os.path.join("results", "experiments.csv")
 DETECTORS = ["yolo", "yolo_seg", "nanodet", "mmdet"]
 
@@ -62,15 +63,16 @@ def fps_mean(detector):
 
 
 def main():
-    print("\n########## DETECTOR P/R/F1 vs GT @ IoU>=0.5 ##########")
-    for det in DETECTORS:
-        print("\n--- det_eval %s ---" % det)
-        _run(["eval.det_eval", "--detector", det, "--device", DEVICE])
+    if not SUMMARY_ONLY:
+        print("\n########## DETECTOR P/R/F1 vs GT @ IoU>=0.5 ##########")
+        for det in DETECTORS:
+            print("\n--- det_eval %s ---" % det)
+            _run(["eval.det_eval", "--detector", det, "--device", DEVICE])
 
-    print("\n########## SEGMENTATION live tracking (yolo_seg + osnet) ##########")
-    _run(["eval.run_tracking", "--detector", "yolo_seg", "--reid", "osnet", "--device", DEVICE])
-    _run(["eval.trackeval_runner", "--benchmark", "MOT15", "--trackers", "yolo_seg__osnet", "--per-seq"])
-    _run(["eval.trackeval_runner", "--benchmark", "MOT16", "--trackers", "yolo_seg__osnet", "--per-seq"])
+        print("\n########## SEGMENTATION live tracking (yolo_seg + osnet) ##########")
+        _run(["eval.run_tracking", "--detector", "yolo_seg", "--reid", "osnet", "--device", DEVICE])
+        _run(["eval.trackeval_runner", "--benchmark", "MOT15", "--trackers", "yolo_seg__osnet", "--per-seq"])
+        _run(["eval.trackeval_runner", "--benchmark", "MOT16", "--trackers", "yolo_seg__osnet", "--per-seq"])
 
     print("\n\n================= SUMMARY (paste into report) =================")
     print("\n[S2.2 Detector P/R/F1 -- mean over sequences]")
