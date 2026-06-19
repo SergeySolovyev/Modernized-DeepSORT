@@ -7,7 +7,7 @@ notebook preserves the "organized scripts, not notebooks" scoring point.
 import json
 import os
 
-DET, REID = "yolo", "timm_mobilenet"   # working default (boxmot/OSNet is build-blocked on numpy-2.x Colab)
+DET, REID = "yolo", "osnet"   # best measured combo (HOTA 51.32). Fallback: "timm_mobilenet" if boxmot/OSNet won't build.
 
 
 def md(text):
@@ -47,6 +47,14 @@ cells = [
     code("# 4) Download + lay out MOT15/MOT16 (TrackEval structure)\n"
          "!python -m data.download_mot"),
 
+    code("# 4b) Config: pick detector + REID for the live pipeline. EXPORT to the shell so every\n"
+         "#     `!python ... $DET / $REID` cell below sees them (Colab `!` subshells inherit os.environ;\n"
+         "#     IPython's own $var substitution does NOT reliably cross cells -> use real env vars).\n"
+         "import os\n"
+         "DET, REID = '%s', '%s'   # 'timm_mobilenet' is the no-boxmot fallback\n" % (DET, REID) +
+         "os.environ['DET'], os.environ['REID'] = DET, REID\n"
+         "print('DET=%s  REID=%s' % (DET, REID))"),
+
     md("## Baseline — unmodified DeepSORT (provided detections + mars-small128)\n"
        "Faithful baseline via the original legacy path. Requires `mars-small128.pb` at "
        "`third_party/deep_sort_data/` (see data/README.md)."),
@@ -64,10 +72,10 @@ cells = [
     code("!python -m eval.reid_eval --reids osnet osnet_fast osnet_ain timm_mobilenet --device cuda"),
 
     md("## Full pipeline — best combo, live tracking → HOTA"),
-    code("DET, REID = '%s', '%s'\n" % (DET, REID) +
+    code("# DET/REID come from the exported env vars set in cell 4b.\n"
          "!python -m eval.run_tracking --detector $DET --reid $REID --device cuda\n"
-         "!python -m eval.trackeval_runner --benchmark MOT15 --trackers ${DET}__${REID} --per-seq\n"
-         "!python -m eval.trackeval_runner --benchmark MOT16 --trackers ${DET}__${REID} --per-seq"),
+         "!python -m eval.trackeval_runner --benchmark MOT15 --trackers baseline ${DET}__${REID} --per-seq\n"
+         "!python -m eval.trackeval_runner --benchmark MOT16 --trackers baseline ${DET}__${REID} --per-seq"),
 
     code("# FPS (must be >= 5 FPS for the real-time requirement)\n"
          "!python -m eval.fps_bench --detector $DET --reid $REID --sequence MOT16-09 --device cuda"),

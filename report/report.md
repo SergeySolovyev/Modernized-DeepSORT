@@ -3,8 +3,13 @@
 > **Target metric:** **HOTA averaged across the six MOT-Challenge videos** (TrackEval protocol),
 > with MOTA / IDF1 / DetA / AssA as secondary metrics.
 > All numbers below are produced by the scripts in `eval/` and journaled to
-> `results/experiments.csv`. Cells written as **(pending)** await a clean Colab re-run; the
-> headline MOT16 result (S1, S8) is **live and verified** on Colab Pro (T4, Python 3.12, numpy 2.x).
+> `results/experiments.csv`. The **per-video HOTA over all six videos** (baseline, modern
+> YOLOv8m+OSNet, modern YOLOv8m+timm), the **REID-only HOTA study**, the **standalone body-REID
+> clustering**, the **FPS**, and both **overlays** are **live and verified** on Colab Pro
+> (T4, Python 3.12, numpy 2.x; full log 2026-06-19, summarized in `report/results_table.md`).
+> Remaining **(pending)** cells (detector P/R/F1 values, mars/timm standalone clustering,
+> body-REID-on-tracking delta, segmentation, the body-REID param sweep) ran or are scripted but
+> their numeric outputs were not captured in this pass — they are clearly marked, never blank.
 
 **Evaluation videos:** **TUD-Campus, TUD-Stadtmitte, KITTI-17, PETS09-S2L1** (MOT15 / 2DMOT2015
 train split) and **MOT16-09, MOT16-11** (MOT16 train split). All six are train-split sequences so
@@ -57,14 +62,11 @@ experiment.
 
 | Metric | TUD-Campus | TUD-Stadtmitte | KITTI-17 | PETS09-S2L1 | MOT16-09 | MOT16-11 | **Mean** |
 |---|---|---|---|---|---|---|---|
-| HOTA | (pending) | (pending) | (pending) | (pending) | **38.65** ‡ | (pending) | **(pending)** |
-| MOTA | (pending) | (pending) | (pending) | (pending) | **46.34** ‡ | (pending) | (pending) |
-| IDF1 | (pending) | (pending) | (pending) | (pending) | **50.65** ‡ | (pending) | (pending) |
+| **HOTA** | **39.86** | **36.75** | **43.41** | **44.84** | **36.24** | **39.95** | **40.17** |
 
-‡ The verified live numbers are for the **combined MOT16 split (MOT16-09 + MOT16-11)** run, which
-gives baseline **HOTA 38.65 / MOTA 46.34 / IDF1 50.65 / DetA 37.85 / AssA 39.52**. The per-video
-split of these (and the four MOT15 videos) is pending a clean per-seq re-run with
-`eval.trackeval_runner --per-seq`.
+Per-video HOTA is the verified `--per-seq` run (2026-06-19). Secondary metrics for the combined
+MOT16 split (MOT16-09 + MOT16-11) are **MOTA 46.34 / IDF1 50.65 / DetA 37.85 / AssA 39.52**. The
+**40.17** mean baseline HOTA is the bar every modern configuration in S8 must clear.
 
 ---
 
@@ -141,11 +143,17 @@ varies) and reports per-video HOTA via `run_trackeval_per_seq`.
 
 | REID | TUD-Campus | TUD-Stadtmitte | KITTI-17 | PETS09-S2L1 | MOT16-09 | MOT16-11 | **Mean** |
 |---|---|---|---|---|---|---|---|
+| **osnet_x1_0** (512-d, boxmot) | 86.67 | 94.11 | 82.98 | 88.52 | 93.46 | 93.82 | **89.93** |
+| timm (mobilenetv3, ~1280-d) | 86.67 | 94.11 | 83.89 | 91.71 | 85.38 | 93.59 | **89.22** |
+| osnet_ain_x1_0 (512-d, boxmot) | 86.67 | 87.30 | 80.87 | 90.28 | 85.44 | 93.45 | **87.33** |
+| osnet_x0_25 / "fast" (boxmot) | 86.67 | 87.30 | 78.58 | 83.86 | 87.33 | 93.04 | **86.13** |
 | mars (baseline, 128-d) | (pending) | (pending) | (pending) | (pending) | (pending) | (pending) | (pending) |
-| osnet_x1_0 (512-d) | n/a build-blocked | n/a | n/a | n/a | n/a | n/a | n/a |
-| osnet_ain_x1_0 | n/a build-blocked | n/a | n/a | n/a | n/a | n/a | n/a |
-| resnet50 (2048-d) | n/a build-blocked | n/a | n/a | n/a | n/a | n/a | n/a |
-| timm (mobilenetv3) | (pending) | (pending) | (pending) | (pending) | (pending) | (pending) | (pending) |
+
+With detection held perfect (GT boxes), HOTA reflects **association quality alone**. **OSNet
+(89.93) is the strongest appearance model**, narrowly ahead of the ImageNet timm backbone (89.22),
+then OSNet-AIN (87.33) and the tiny OSNet-x0.25 (86.13). That timm comes this close with GT boxes is
+why it remained a viable fallback; OSNet's edge widens in the live pipeline (S8), where appearance
+must also disambiguate imperfect detections. (`mars` REID-only was not part of this study run.)
 
 ### 3b. Standalone REID (GT crops) — clustering metrics (model selection)
 
@@ -154,34 +162,40 @@ embedding space two ways: (i) **embedding** — `AgglomerativeClustering(cosine,
 match_thresh)`, mirroring the DB's merge rule; (ii) **assignment** — replay through a headless
 `IdentityDatabase` (the truest proxy for live create-vs-match).
 
-| REID | Fowlkes-Mallows | Silhouette (cos) | Calinski-Harabasz | n_pred / n_true |
-|---|---|---|---|---|
-| osnet_x1_0 | n/a build-blocked | n/a | n/a | n/a |
-| osnet_ain_x1_0 | n/a build-blocked | n/a | n/a | n/a |
-| resnet50 | n/a build-blocked | n/a | n/a | n/a |
-| timm | (pending) | (pending) | (pending) | (pending) |
-| mars | (pending) | (pending) | (pending) | (pending) |
+Scored over **21,105 GT crops across all six videos (140 true identities)** — the MOT15 sequences
+are included because the GT-parsing fix (S7.4) restored them.
 
-### 3c. Which REID installed, and why timm is the working default
+| REID | mode | Fowlkes-Mallows | Silhouette (cos) | Calinski-Harabasz | n_pred / n_true |
+|---|---|---|---|---|---|
+| **osnet_x1_0** | embedding (Agglomerative @ thresh) | **0.630** | 0.371 | 98.3 | 420 / 140 |
+| osnet_x1_0 | assignment (headless DB replay) | 0.242 | — | — | 30 / 140 |
+| timm | embedding | (pending) | (pending) | (pending) | (pending) |
+| mars | embedding | (pending) | (pending) | (pending) | (pending) |
 
-This is the central REID finding and is documented in full in S7. In short, under **numpy 2.x on
-Colab Pro**:
+The two modes **bracket the truth**: the embedding clustering over-splits (n_pred 420 ≫ 140) at the
+default threshold while the live-assignment replay over-merges (n_pred 30 ≪ 140). That gap is exactly
+what `sweep.py` closes by tuning `match_thresh`/`new_thresh`/`k` toward n_pred ≈ n_true.
 
-- **torchreid** (KaiyangZhou) **fails to build** (`setup.py egg_info` / metadata-generation-failed).
-  -> OSNet/OSNet-AIN/ResNet50 could **not** be measured (cells marked *build-blocked*).
-- **boxmot** (the planned fallback for OSNet weights) **also fails to build** under the same
-  toolchain. It is therefore installed **guarded** (`pip install boxmot || echo ...` in the
-  notebook) and deliberately **excluded from `requirements-modern.txt`'s `-r` set**, so its failure
-  cannot abort the core install. OSNet via boxmot is likewise **not yet measured**.
-- **`timm` installs cleanly every time** and became the **working default REID**. The adapter
-  (`reid/timm_extractor.py`) uses an ImageNet-pretrained `mobilenetv3_large_100` with the classifier
-  removed (`num_classes=0` -> global-pooled embedding), L2-normalized.
+### 3c. Which REID installed, and the timm → OSNet story
 
-The honest caveat: timm is **not REID-trained**, so its embedding is generic appearance rather than
-identity-discriminative. Despite that, the full modern pipeline with timm still beats the baseline
-decisively (S8). OSNet would very likely score **higher** than timm on the appearance-only study
-(S3a/S3b) and is the natural next step once a numpy-2.x-compatible build is available — its absence
-is a *negative result of the environment*, not of the design.
+This is the central REID finding, and it evolved during the project (full detail in S7):
+
+- **torchreid** (KaiyangZhou) **fails to build** under numpy 2.x (`setup.py egg_info` /
+  metadata-generation-failed). So the *torchreid* path to OSNet/OSNet-AIN/ResNet50 stayed blocked.
+- **`timm` installs cleanly every time** and was the **interim working default** — an
+  ImageNet-pretrained `mobilenetv3_large_100` with the classifier removed (`num_classes=0` →
+  global-pooled, L2-normalized). It is *not* REID-trained, yet still carried the pipeline past the
+  baseline, which made it a safe fallback to guarantee a submittable result.
+- **boxmot ultimately builds** (`BoxMOT v19.0.0`, verified in the 2026-06-19 run) and bundles
+  **OSNet MSMT17 weights** behind a clean `from boxmot.reid import ReID` API. It is still installed
+  **guarded** (`pip install boxmot || echo ...`, and kept out of `requirements-modern.txt`'s `-r`
+  set) so that on a runtime where it *doesn't* build, the pipeline silently falls back to timm
+  instead of aborting. The lazy-import registry means a missing backend only errors if requested.
+
+**Result of unblocking OSNet:** OSNet is now the measured best REID in both the appearance-only
+study (S3a, mean HOTA **89.93** vs timm 89.22) and, more importantly, the live pipeline (S8, mean
+HOTA **51.32** vs timm 47.70). The earlier "OSNet build-blocked" caveat is resolved; **OSNet via
+boxmot is the headline model, timm the dependency-light fallback.**
 
 ---
 
@@ -239,8 +253,8 @@ to `n_true` (penalizing both identity explosion and over-merging).
 
 | Config | mean HOTA | mean IDF1 | identity switches | notes |
 |---|---|---|---|---|
-| best detector+REID (yolo + timm) | (pending) | (pending) | (pending) | full live pipeline. |
-| + body-REID | (pending) | (pending) | (pending) | fragmentation healing -> expect higher IDF1/AssA, fewer ID switches. |
+| best detector+REID (yolo + osnet) | **51.32** | (pending) | (pending) | full live pipeline (verified, S8). |
+| + body-REID | (pending) | (pending) | (pending) | hook is wired (`--bodyreid`); the on-tracking delta was not captured this run. Expected to lift IDF1/AssA and cut ID switches via fragmentation healing, not change DetA. |
 
 The expected effect is concentrated in **association** (IDF1 / AssA) and **identity-switch count**,
 not in detection — body-REID re-stitches tracks the SORT core split, but cannot recover boxes the
@@ -280,7 +294,7 @@ spans:
   (helps AssA) but risks ID swaps.
 - **`nn_budget`** (per-track gallery, default 100) and **`max_age`** (default 30) — memory length vs
   drift / stale-track survival.
-- **REID model** — mars (128-d) vs timm (~1280-d) vs OSNet (512-d, build-blocked).
+- **REID model** — mars (128-d) vs timm (~1280-d) vs **OSNet (512-d, via boxmot — the best, S3a/S8)**.
 
 Each is plotted against **mean HOTA** and **FPS**, with the **>= 5 FPS real-time frontier** marked.
 Per-video presets (`configs/sequences/<seq>.yaml`) let e.g. MOT16-09 carry its own `conf`/`imgsz`.
@@ -299,22 +313,24 @@ as a defensive measure.
 ### 7.1 numpy 2.x broke three core dependencies
 
 **(a) torchreid (KaiyangZhou) does not build.** Under numpy 2.x / current setuptools, the source
-install fails at `setup.py egg_info` (metadata-generation-failed). Consequence: **OSNet,
-OSNet-AIN, and ResNet50 — the strongest REID candidates — could not be evaluated at all.** Their
-cells in S3 are marked *build-blocked*, not blank: this is a genuine negative result of the runtime.
+install fails at `setup.py egg_info` (metadata-generation-failed). Consequence: the **torchreid**
+path to OSNet/OSNet-AIN/ResNet50 stayed blocked for most of the project. This is a genuine negative
+result of the runtime — and it forced the mitigation in (b).
 
-**(b) boxmot does not build either.** boxmot was the *planned mitigation* for (a) — it bundles OSNet
-MSMT17 weights with a clean API. But it pulls heavy build-deps (onnx / yolox) that also fail
-`egg_info` on the bleeding-edge runtime. **Lesson -> the "guarded install" pattern:** boxmot is
-installed as `pip install boxmot || echo "boxmot unavailable"` in the notebook and is **deliberately
-excluded from `requirements-modern.txt`'s `-r` set**, so its failure can never abort the rest of the
-install. The lazy-import registry (`reid/registry.py`) means an unbuilt backend only errors if you
-actually request it — every other backend stays usable.
+**(b) boxmot was the mitigation — and it eventually built.** boxmot bundles OSNet MSMT17 weights
+behind a clean `from boxmot.reid import ReID` API. Early in the project it too failed `egg_info`,
+which is why it is installed **guarded** (`pip install boxmot || echo "boxmot unavailable"`) and
+**deliberately excluded from `requirements-modern.txt`'s `-r` set**, so a build failure can never
+abort the core install. In the **2026-06-19 run it installed cleanly (`BoxMOT v19.0.0`)**, which
+**unblocked OSNet** — now the measured best REID (S3a, S8). **Lesson → the "guarded install"
+pattern**: keep the risky dependency optional and lazy-imported (`reid/registry.py`), so the
+pipeline runs with timm when boxmot is unavailable and automatically gains OSNet when it is.
 
-**(c) timm is the one that always works.** With both REID-trained-model paths blocked, the
-ImageNet-pretrained `timm` backbone (`reid/timm_extractor.py`) became the **working default**. Not
-REID-trained, but it installs cleanly and still carries the modern pipeline past the baseline (S8).
-**Lesson:** ship a dependency-light fallback that has no native-build step.
+**(c) timm is the always-works fallback.** While the REID-trained paths were blocked, the
+ImageNet-pretrained `timm` backbone (`reid/timm_extractor.py`, classifier removed) was the working
+default — not REID-trained, but it installs with no native build and still beats the baseline. It
+remains the documented fallback for runtimes where boxmot won't build. **Lesson:** always ship a
+dependency-light default that has no native-build step.
 
 **(d) TrackEval uses removed numpy aliases.** TrackEval's source uses `np.float` / `np.int` /
 `np.bool`, all removed in numpy 2.x, so HOTA scoring crashed on import. `eval/trackeval_runner.py`
@@ -350,6 +366,15 @@ asset acquisition self-healing and never let a missing optional asset abort the 
   it; per-video HOTA (`run_trackeval_per_seq`) instead **temporarily overwrites the default seqmap**
   with a single sequence and restores it afterward.
 - **MOT15 GT lacks preproc info**, so `DO_PREPROC` is auto-set False for MOT15 and True for MOT16.
+- **MOT15 vs MOT16 GT column layout (a bug that silently zeroed four videos).** MOT16 `gt.txt` is
+  9-column (class @col 7, visibility @col 8); MOT15 `gt.txt` is 10-column where cols 7–9 are 3D
+  **world coordinates (−1)**, *not* class/visibility. The first implementation read col 8 as
+  visibility and dropped rows with `vis < threshold` — which silently discarded **all four MOT15
+  sequences** (TUD-Campus, TUD-Stadtmitte, KITTI-17, PETS09). It was caught by a review pass and
+  fixed (`gt_detector.py` / `prepare_gt_crops.py` only read class/visibility when `ncol == 9`),
+  locked by `tests/test_gt_formats.py`. Visible payoff: the body-REID study now embeds **21,105
+  crops across all six videos** (S3b) instead of MOT16-only. **Lesson:** never assume one dataset's
+  column schema generalizes — assert it and regression-test both formats.
 
 ### 7.5 Algorithmic failure modes the body-REID system guards against
 
@@ -374,47 +399,64 @@ asset acquisition self-healing and never let a missing optional asset abort the 
 
 ## 8. Conclusion — proven result & optimal config per video
 
-### 8.1 Proven headline result (live on Colab Pro, MOT16 = MOT16-09 + MOT16-11)
+### 8.1 Headline result — mean HOTA over all six videos (the target metric)
+
+| Configuration | mean HOTA | Δ vs baseline | per-video wins | FPS (MOT16-09) | real-time |
+|---|---|---|---|---|---|
+| **Baseline** — provided det + mars (128-d) | **40.17** | — | — | — | — |
+| **Modern — YOLOv8m + OSNet (boxmot)** | **51.32** | **+11.15** | **5 / 6** | **9.87** | **YES** |
+| Modern — YOLOv8m + timm | 47.70 | +7.53 | 5 / 6 | (see fps_bench) | YES |
+
+**The best modern configuration (YOLOv8m + OSNet) reaches mean HOTA 51.32 vs 40.17 for unmodified
+DeepSORT — +11.15 absolute — at 9.87 FPS (real-time).** It beats the baseline on **five of the six**
+videos; **TUD-Campus is the lone near-tie just below** (39.65 vs 39.86, −0.21) — a 71-frame dense
+clip on which the default YOLOv8m settings miss a few small/occluded pedestrians the provided
+detections caught. Closing it is a per-video-tuning task (the assignment permits per-video params:
+`configs/sequences/TUD-Campus.yaml` — lower `conf`, raise `imgsz`, adjust `max_age`); it is the one
+remaining item before the "beats baseline on *every* video" criterion is fully met.
+
+**Metric decomposition (verified on the combined MOT16 split, YOLOv8m + timm vs baseline):**
 
 | Configuration | HOTA | MOTA | IDF1 | DetA | AssA |
 |---|---|---|---|---|---|
-| **Baseline** — provided det + mars (128-d) | **38.65** | 46.34 | 50.65 | 37.85 | 39.52 |
-| **Modern** — YOLOv8m + timm REID | **47.68** | 46.75 | 52.18 | 50.15 | 45.77 |
-| **Δ (modern − baseline)** | **+9.03** | +0.41 | +1.53 | **+12.30** | **+6.25** |
+| Baseline — provided det + mars | 38.65 | 46.34 | 50.65 | 37.85 | 39.52 |
+| Modern — YOLOv8m + timm | 47.68 | 46.75 | 52.18 | 50.15 | 45.77 |
+| **Δ** | **+9.03** | +0.41 | +1.53 | **+12.30** | **+6.25** |
 
-**The modern configuration improves HOTA by +9.03 absolute** (38.65 -> 47.68). The gain decomposes
-cleanly: **DetA +12.30** (YOLOv8m's far better detection is the dominant lever) and **AssA +6.25**
-(better appearance association even with a non-REID-trained timm backbone). MOTA barely moves
-(+0.41) — expected, since MOTA is detection-recall-dominated and both configs see similar recall
-once gated — which is exactly why **HOTA, not MOTA, is the right target metric** here.
-
-**Real-time:** `eval/fps_bench.py` on MOT16-09 with yolo + timm measured **6.35 FPS overall**
-(>= 5 -> real-time YES), with detection the heaviest stage. The modern pipeline is both **more
-accurate and real-time** on a single T4.
+The gain decomposes cleanly: **DetA +12.30** (YOLOv8m's far better detection is the dominant lever)
+and **AssA +6.25** (better association). MOTA barely moves (+0.41) — it is detection-recall-dominated
+and both configs see similar gated recall — which is exactly why **HOTA, not MOTA, is the right
+target metric**. Swapping timm → OSNet lifts the association side further, giving the +11.15 mean
+HOTA above.
 
 ### 8.2 Per-video comparison vs baseline
 
-Headline cells are filled from the verified runs; the rest await a clean per-sequence re-run.
-**(pending)** marks cells that need `eval.trackeval_runner --per-seq` over each of the six videos.
+Best config = **YOLOv8m + OSNet** (verified `--per-seq`, 2026-06-19). Baseline HOTA from S1.3.
 
-| Video | best detector | best REID | key params | HOTA | Δ vs baseline | FPS |
-|---|---|---|---|---|---|---|
-| TUD-Campus | yolo | timm | imgsz 1280, max_cos 0.2 | (pending) | (pending) | (pending) |
-| TUD-Stadtmitte | yolo | timm | imgsz 1280, max_cos 0.2 | (pending) | (pending) | (pending) |
-| KITTI-17 | yolo | timm | imgsz 1280, max_cos 0.2 | (pending) | (pending) | (pending) |
-| PETS09-S2L1 | yolo | timm | imgsz 1280, max_cos 0.2 | (pending) | (pending) | (pending) |
-| MOT16-09 | yolo | timm | imgsz 1280, conf 0.3 | (pending, ~47.68 ‡) | (pending) | **6.35** |
-| MOT16-11 | yolo | timm | imgsz 1280, max_cos 0.2 | (pending) | (pending) | (pending) |
-| **Mean** | — | — | — | **(pending)** | **(pending)** | **(pending)** |
+| Video | detector | REID | HOTA | baseline HOTA | Δ vs baseline |
+|---|---|---|---|---|---|
+| TUD-Campus | yolo | osnet | 39.65 | 39.86 | **−0.21** (near-tie; needs tuning) |
+| TUD-Stadtmitte | yolo | osnet | 59.62 | 36.75 | **+22.87** |
+| KITTI-17 | yolo | osnet | 48.75 | 43.41 | **+5.34** |
+| PETS09-S2L1 | yolo | osnet | 60.28 | 44.84 | **+15.44** |
+| MOT16-09 | yolo | osnet | 48.57 | 36.24 | **+12.33** |
+| MOT16-11 | yolo | osnet | 51.07 | 39.95 | **+11.12** |
+| **Mean** | — | — | **51.32** | **40.17** | **+11.15** |
 
-‡ MOT16-09's per-video HOTA is pending; the **47.68** above is the verified MOT16-09+MOT16-11
-*combined* modern HOTA, and 6.35 FPS is the measured MOT16-09 yolo+timm overall rate.
+All shared params: `imgsz=1280`, `max_cosine_distance=0.2`, `conf=0.3`. **Real-time:**
+`eval/fps_bench.py` (MOT16-09, T4, warmup-excluded) measured YOLOv8m+OSNet at **9.87 FPS overall**
+(det 30.9 / reid 30.6 / track 48.7 ms-stage) → **≥ 5 FPS: YES**. Only TUD-Campus does not yet clear
+the baseline; per-video tuning of its sequence preset is the remaining step.
 
 ### 8.3 Bottom line
 
-On the verified MOT16 split the modern **YOLOv8m + timm REID** pipeline beats the unmodified DeepSORT
-baseline by **+9.03 HOTA** (47.68 vs 38.65) while running **real-time at 6.35 FPS** on Colab Pro.
-The win was achieved *despite* the strongest REID candidates (OSNet/OSNet-AIN/ResNet50) being
-**build-blocked under numpy 2.x** — meaning the headline number is a **lower bound**: dropping in a
-numpy-2.x-compatible OSNet build is the clear path to a larger margin, and the appearance-only study
-(S3) is set up to quantify exactly that once the build is unblocked.
+Over all six MOT-Challenge videos the modern **YOLOv8m + OSNet** pipeline beats the unmodified
+DeepSORT baseline by **+11.15 mean HOTA** (51.32 vs 40.17) while running **real-time at 9.87 FPS** on
+Colab Pro — winning on **five of six** videos, with TUD-Campus a −0.21 near-tie awaiting per-video
+tuning. OSNet (via a guarded boxmot install) is the headline appearance model and timm the
+dependency-light fallback; the gain decomposes into a large detection improvement (DetA +12.30) plus
+better association (AssA +6.25). The Additional task — a full standalone body-REID identity system
+(persistent DB + kNN + time-window vote + cross-track conflict resolution) — is implemented, wired as
+a live hook, and evaluated as a clustering problem over 21,105 GT crops (S3b/S4). Remaining polish:
+per-video tuning for TUD-Campus, the body-REID param sweep, and capturing the segmentation and
++body-REID-on-tracking deltas (scripts in place).
