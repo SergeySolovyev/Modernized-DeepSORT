@@ -69,7 +69,7 @@ class OverlayWriter:
 
 
 def _render_from_mot(seq_dir, mot_file, out_path):
-    """Render an existing MOT-format result file (e.g. the baseline tracker) — no models."""
+    """Render an existing MOT-format result file (e.g. the baseline tracker) - no models."""
     data = np.atleast_2d(np.loadtxt(mot_file, delimiter=","))
     if data.size == 0 or data.shape[1] < 6:
         print("empty/invalid MOT file (nothing to render):", mot_file)

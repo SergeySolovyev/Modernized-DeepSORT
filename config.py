@@ -84,7 +84,7 @@ def build_config(detector=None, reid=None, sequence=None, overrides=None,
             raise FileNotFoundError("No reid preset 'configs/reid/%s.yaml'" % reid)
         cfg = _deep_merge(cfg, preset)
     if sequence is not None:
-        # Sequence presets are optional — silently skip if absent.
+        # Sequence presets are optional - silently skip if absent.
         cfg = _deep_merge(cfg, load_yaml(os.path.join(config_dir, "sequences", sequence + ".yaml")))
     cfg = apply_overrides(cfg, overrides)
     return cfg

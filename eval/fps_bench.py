@@ -1,4 +1,4 @@
-"""FPS benchmark for a (detector, reid) combo — proves the >=5 FPS real-time bar.
+"""FPS benchmark for a (detector, reid) combo - proves the >=5 FPS real-time bar.
 
 Times detector / REID / tracker stages separately (after warmup) over one sequence.
 

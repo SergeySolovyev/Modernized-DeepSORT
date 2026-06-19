@@ -20,10 +20,10 @@ def code(text):
 
 
 cells = [
-    md("# Modernized DeepSORT — execution notebook\n\n"
+    md("# Modernized DeepSORT - execution notebook\n\n"
        "Thin orchestrator: every step calls the repo's scripts (logic lives in `eval/`, "
        "`data/`, `bodyreid/`). Runs top-to-bottom on **Colab Pro (GPU)**.\n\n"
-       "**Instructions:** set `REPO_URL`, Runtime → GPU, then Run all. Results are logged to "
+       "**Instructions:** set `REPO_URL`, Runtime -> GPU, then Run all. Results are logged to "
        "`results/experiments.csv`; overlays to `overlays/`."),
 
     code("# 1) Clone the repo and enter it (public repo -> no auth; if private, use a PAT URL)\n"
@@ -55,7 +55,7 @@ cells = [
          "os.environ['DET'], os.environ['REID'] = DET, REID\n"
          "print('DET=%s  REID=%s' % (DET, REID))"),
 
-    md("## Baseline — unmodified DeepSORT (provided detections + mars-small128)\n"
+    md("## Baseline - unmodified DeepSORT (provided detections + mars-small128)\n"
        "Faithful baseline via the original legacy path. Requires `mars-small128.pb` at "
        "`third_party/deep_sort_data/` (see data/README.md)."),
     code("# 5) Baseline: unmodified DeepSORT (provided detections + mars-small128).\n"
@@ -64,14 +64,14 @@ cells = [
          "!python -m eval.trackeval_runner --benchmark MOT15 --trackers baseline --per-seq\n"
          "!python -m eval.trackeval_runner --benchmark MOT16 --trackers baseline --per-seq"),
 
-    md("## Detector study — Precision / Recall / F1 vs GT (IoU≥0.5)"),
+    md("## Detector study - Precision / Recall / F1 vs GT (IoU>=0.5)"),
     code("for det in ['yolo', 'nanodet', 'mmdet']:\n"
          "    !python -m eval.det_eval --detector $det --device cuda"),
 
-    md("## REID study — REID-only HOTA (GT boxes, SORT detection disabled)"),
+    md("## REID study - REID-only HOTA (GT boxes, SORT detection disabled)"),
     code("!python -m eval.reid_eval --reids osnet osnet_fast osnet_ain timm_mobilenet --device cuda"),
 
-    md("## Full pipeline — best combo, live tracking → HOTA"),
+    md("## Full pipeline - best combo, live tracking -> HOTA"),
     code("# DET/REID come from the exported env vars set in cell 4b.\n"
          "!python -m eval.run_tracking --detector $DET --reid $REID --device cuda\n"
          "!python -m eval.trackeval_runner --benchmark MOT15 --trackers baseline ${DET}__${REID} --per-seq\n"
@@ -80,7 +80,7 @@ cells = [
     code("# FPS (must be >= 5 FPS for the real-time requirement)\n"
          "!python -m eval.fps_bench --detector $DET --reid $REID --sequence MOT16-09 --device cuda"),
 
-    md("## Additional task — standalone body-REID identity system"),
+    md("## Additional task - standalone body-REID identity system"),
     code("# Standalone REID model/param selection on GT crops\n"
          "!python -m data.prepare_gt_crops\n"
          "!python -m bodyreid.eval.extract_gt --reid $REID --out descriptors_$REID.npz --device cuda\n"
@@ -89,11 +89,11 @@ cells = [
     code("# Full pipeline WITH the identity system\n"
          "!python -m eval.run_tracking --detector $DET --reid $REID --bodyreid --device cuda"),
 
-    md("## Segmentation — YOLOv8-seg (mask→bbox)"),
+    md("## Segmentation - YOLOv8-seg (mask->bbox)"),
     code("!python -m eval.det_eval --detector yolo_seg --device cuda\n"
          "!python -m eval.run_tracking --detector yolo_seg --reid $REID --device cuda"),
 
-    md("## Overlays — baseline vs best"),
+    md("## Overlays - baseline vs best"),
     code("import os; os.makedirs('overlays', exist_ok=True)\n"
          "# baseline overlay = render the unmodified-tracker's MOT output file (no models needed)\n"
          "!python -m eval.make_overlays --sequence MOT16-09 --mot-file data/trackeval/trackers/mot_challenge/MOT16-train/baseline/data/MOT16-09.txt --out overlays/baseline_MOT16-09.mp4\n"

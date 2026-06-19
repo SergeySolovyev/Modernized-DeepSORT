@@ -68,7 +68,7 @@ class BaseDetector(ABC):
     def __init__(self, cfg, device="cuda"):
         self.cfg = dict(cfg or {})
         self.device = device
-        # `person_class_id` is centralized here — never hardcode 0 in a subclass,
+        # `person_class_id` is centralized here - never hardcode 0 in a subclass,
         # because the COCO person index can differ across frameworks/configs.
         self.person_class_id = int(self.cfg.get("person_class_id", 0))
         self.conf = float(self.cfg.get("conf", 0.25))

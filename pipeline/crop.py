@@ -2,7 +2,7 @@
 
 Returns exactly one crop per box (alignment with the detection list must be
 preserved). Boxes are clipped to image bounds; degenerate boxes yield a 1px
-patch so the REID extractor — which resizes internally — never receives an
+patch so the REID extractor - which resizes internally - never receives an
 empty array.
 """
 import numpy as np
@@ -15,7 +15,7 @@ def crop_patches(frame, tlwh_boxes, pad=0.0):
     ----------
     pad : float
         Optional fractional padding added on each side (e.g. 0.1 adds 10% of
-        the box size) — sometimes helps REID by including context.
+        the box size) - sometimes helps REID by including context.
 
     Returns
     -------

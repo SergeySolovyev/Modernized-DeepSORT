@@ -3,7 +3,7 @@
 #
 # Finding: this was the only video where YOLOv8m+OSNet trailed the baseline (39.65 vs 39.86).
 # A recall-direction sweep (imgsz 960->1280->1536, conf down) made HOTA *worse* monotonically
-# (39.65 -> 35.0 -> 29.7) — more detections hurt. Root cause: the live pipeline applies NO NMS
+# (39.65 -> 35.0 -> 29.7) - more detections hurt. Root cause: the live pipeline applies NO NMS
 # (tracker.nms_max_overlap default 1.0) and NO confidence gate (tracker.min_confidence default
 # 0.0), so YOLO's many low-confidence false positives on this dense clip flood the tracker,
 # spawning spurious tracks that wreck DetA precision and AssA. The precision-direction sweep

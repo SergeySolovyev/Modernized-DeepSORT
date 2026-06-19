@@ -1,4 +1,4 @@
-"""FastReID extractor (JDAI-CV/fast-reid) — optional extra REID source.
+"""FastReID extractor (JDAI-CV/fast-reid) - optional extra REID source.
 
 FastReID is installed from source. This wraps its DefaultPredictor with a config +
 weights. Optional: torchreid + timm + mars already give >=3 models from >=2 sources;

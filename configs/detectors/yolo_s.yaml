@@ -1,6 +1,6 @@
 detector:
   name: yolo
-  weights: yolov8s.pt      # smaller/faster than v8m — use to hit the >=5 FPS bar on 1080p
+  weights: yolov8s.pt      # smaller/faster than v8m - use to hit the >=5 FPS bar on 1080p
   conf: 0.25
   iou: 0.7
   imgsz: 1280

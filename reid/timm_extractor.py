@@ -1,6 +1,6 @@
 """Generic timm-backbone REID extractor (second REID source).
 
-Not REID-trained — uses an ImageNet-pretrained backbone with the classifier removed
+Not REID-trained - uses an ImageNet-pretrained backbone with the classifier removed
 (num_classes=0 -> global-pooled embedding), L2-normalized. Provides architectural/
 source diversity vs torchreid. Manual preprocessing (resize + ImageNet normalize).
 """

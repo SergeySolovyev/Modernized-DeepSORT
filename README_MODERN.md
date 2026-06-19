@@ -1,4 +1,4 @@
-# Modernized DeepSORT — Person Tracking with Pluggable Detectors & REID
+# Modernized DeepSORT - Person Tracking with Pluggable Detectors & REID
 
 A modernization of the original [nwojke/deep_sort](https://github.com/nwojke/deep_sort)
 (this repo preserves its full commit history). The SORT core is kept intact; detection
@@ -14,27 +14,27 @@ pipeline/    live TrackingRunner (detect -> crop -> REID -> Detection -> SORT), 
 bodyreid/    persistent identity DB + kNN + window-vote + conflict resolution (Additional)
 eval/        det P/R/F1, run_tracking, TrackEval/HOTA, reid-only HOTA, FPS, overlays
 data/        MOT download/layout, GT-crop export
-deep_sort/   ORIGINAL SORT core — unchanged except a feature-dimension guard in nn_matching
+deep_sort/   ORIGINAL SORT core - unchanged except a feature-dimension guard in nn_matching
 ```
 
 The single integration seam is the original contract `Detection(tlwh, confidence, feature)`
 fed to `tracker.update(...)`. The cosine appearance metric is dimension-agnostic, so REID
 models of any output size (128 / 512 / 2048) work unchanged.
 
-## Model inventory (diversity → scoring)
+## Model inventory (diversity -> scoring)
 
 | Type | Models | Sources |
 |------|--------|---------|
 | Detection | YOLOv8 (`yolo`), NanoDet (`nanodet`), MMDetection RTMDet (`mmdet`) | ultralytics, RangiLyu, open-mmlab (3 repos) |
-| Segmentation | YOLOv8-seg (`yolo_seg`, mask→bbox) | ultralytics |
-| REID | OSNet / OSNet-AIN / ResNet50 (`torchreid`), timm backbone (`timm`), mars-small128 (`mars`, baseline) | deep-person-reid, timm, original (≥2 sources) |
+| Segmentation | YOLOv8-seg (`yolo_seg`, mask->bbox) | ultralytics |
+| REID | OSNet / OSNet-AIN / ResNet50 (`torchreid`), timm backbone (`timm`), mars-small128 (`mars`, baseline) | deep-person-reid, timm, original (>=2 sources) |
 | REID (optional) | FastReID (`fastreid`) | JDAI-CV |
 
 ## Install
 
 ```bash
 pip install -r requirements-modern.txt
-pip install git+https://github.com/KaiyangZhou/deep-person-reid.git   # torchreid (OSNet/ResNet50) — not on PyPI
+pip install git+https://github.com/KaiyangZhou/deep-person-reid.git   # torchreid (OSNet/ResNet50) - not on PyPI
 pip install -U openmim && mim install mmengine "mmcv>=2.0" mmdet      # for the mmdet detector
 git clone https://github.com/JonathonLuiten/TrackEval third_party/TrackEval && pip install -e third_party/TrackEval
 ```
@@ -60,8 +60,8 @@ or per-sequence presets in `configs/sequences/<seq>.yaml`.
 ## Reproducing the report
 
 The notebook [notebooks/DeepSORT_Modern.ipynb](notebooks/DeepSORT_Modern.ipynb) is a thin
-orchestrator that runs install → download → baseline → detector/REID studies → best-combo
-tracking → body-REID → overlays end-to-end in Colab. Numbers land in `results/experiments.csv`;
+orchestrator that runs install -> download -> baseline -> detector/REID studies -> best-combo
+tracking -> body-REID -> overlays end-to-end in Colab. Numbers land in `results/experiments.csv`;
 the writeup is in [report/report.md](report/report.md).
 
 ## Tests

@@ -1,4 +1,4 @@
-"""TrackingRunner — the live per-frame loop that generalizes deep_sort_app.run().
+"""TrackingRunner - the live per-frame loop that generalizes deep_sort_app.run().
 
 Two modes:
   * "live"  : detector -> conf-filter/NMS -> crop -> REID -> Detection -> tracker

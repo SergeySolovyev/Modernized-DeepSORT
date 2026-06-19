@@ -93,7 +93,7 @@ def run_trackeval_per_seq(benchmark, tracker, sequences, trackeval_root="third_p
 
     TrackEval auto-reads GT_FOLDER/seqmaps/<BENCH>-train.txt; since --SEQMAP_FILE can't be
     passed safely, we overwrite that file with a single sequence (backing up + restoring the
-    original). Returns {seq: {HOTA, MOTA, IDF1, ...}} — reliable per-video numbers.
+    original). Returns {seq: {HOTA, MOTA, IDF1, ...}} - reliable per-video numbers.
     """
     out = {}
     seqmap = seqmap_path(benchmark)

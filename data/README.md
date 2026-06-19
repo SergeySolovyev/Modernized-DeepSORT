@@ -8,7 +8,7 @@ python -m data.download_mot          # downloads 2DMOT2015 + MOT16, lays out:
 #   data/trackeval/gt/mot_challenge/seqmaps/<BENCH>-train.txt
 ```
 The six evaluation sequences (all TRAIN-split, GT available):
-MOT15 — TUD-Campus, TUD-Stadtmitte, KITTI-17, PETS09-S2L1 ; MOT16 — MOT16-09, MOT16-11.
+MOT15 - TUD-Campus, TUD-Stadtmitte, KITTI-17, PETS09-S2L1 ; MOT16 - MOT16-09, MOT16-11.
 
 ### MOT16 fallback (official site often unavailable)
 `motchallenge.net`'s MOT16 download is frequently unreachable. Use a mirror and point the
@@ -45,7 +45,7 @@ python -m data.prepare_gt_crops      # -> data/gt_crops/<seq>/<track_id>/<frame>
   ```
 
 ## REID backends
-- **torchreid** (`pip install git+https://github.com/KaiyangZhou/deep-person-reid.git` — NOT the PyPI `torchreid`, which is an unrelated package): osnet_x1_0 / osnet_ain_x1_0 / resnet50 — weights auto-download.
+- **torchreid** (`pip install git+https://github.com/KaiyangZhou/deep-person-reid.git` - NOT the PyPI `torchreid`, which is an unrelated package): osnet_x1_0 / osnet_ain_x1_0 / resnet50 - weights auto-download.
 - **timm** (`pip install timm`): generic backbone, ImageNet-pretrained.
 - **mars** (baseline): download the original deep_sort_data and place `mars-small128.pb` at
   `third_party/deep_sort_data/mars-small128.pb` (loaded via `tf.compat.v1`).

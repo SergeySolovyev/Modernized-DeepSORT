@@ -1,9 +1,9 @@
 """Score a REID model's descriptors against GT identities (sklearn clustering metrics).
 
 Two complementary modes:
-  embedding : AgglomerativeClustering(cosine, distance_threshold=match_thresh) — directly
+  embedding : AgglomerativeClustering(cosine, distance_threshold=match_thresh) - directly
               mirrors the DB's "merge if within threshold" rule; scores the embedding space.
-  assignment: replay descriptors through a headless IdentityDatabase (bodyreid.search) —
+  assignment: replay descriptors through a headless IdentityDatabase (bodyreid.search) -
               the truest proxy for live create-vs-match; exercises thresholds/k/gallery.
 
   python -m bodyreid.eval.cluster_eval --npz descriptors_osnet.npz --match-thresh 0.3

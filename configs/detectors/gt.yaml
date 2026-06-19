@@ -1,6 +1,6 @@
 detector:
   name: gt
-  # Ground-truth "detector" — returns GT boxes for the current frame. Used for
+  # Ground-truth "detector" - returns GT boxes for the current frame. Used for
   # REID-only HOTA (SORT detection disabled) and as the P/R/F1 reference.
   gt_file: null            # auto-set to <sequence>/gt/gt.txt when omitted
   conf: 1.0

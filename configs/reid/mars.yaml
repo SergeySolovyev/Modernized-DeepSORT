@@ -1,5 +1,5 @@
 reid:
-  name: mars                      # original DeepSORT appearance model (128-d) — BASELINE
+  name: mars                      # original DeepSORT appearance model (128-d) - BASELINE
   weights: third_party/deep_sort_data/mars-small128.pb   # TF1 frozen graph
   input_size: [128, 64]
   batch_size: 32

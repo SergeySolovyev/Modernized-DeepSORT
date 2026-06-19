@@ -1,40 +1,41 @@
-# Modernized DeepSORT — HSE "Deep Learning for CV" final project
+# Modernized DeepSORT (HSE "Deep Learning for Computer Vision" final project)
 
-This repository **modernizes the original DeepSORT** (`nwojke/deep_sort`, preserved below and in
-the git history) into a configurable, real-time multi-object tracker with pluggable modern
-detectors, REID models, and a segmentation path — plus a standalone body-REID identity system.
+This repository modernizes the original DeepSORT (`nwojke/deep_sort`, retained below and in the git
+history) into a configurable multi-object tracker with selectable detectors and re-identification
+(REID) models, a segmentation option, and a standalone body-REID identity component.
 
-## Headline result (HOTA, TrackEval, six MOT-Challenge videos)
+## Results (HOTA, TrackEval protocol, six MOT-Challenge videos)
 
-| Configuration | mean HOTA | Δ vs baseline | per-video wins | FPS | real-time |
+| Configuration | mean HOTA | Delta vs baseline | per-video wins | FPS | real-time |
 |---|---|---|---|---|---|
-| Baseline — unmodified DeepSORT (provided det + mars) | 40.17 | — | — | — | — |
-| **Modern — YOLOv8m + OSNet** | **52.54** | **+12.37** | **6 / 6** | **9.87** | **YES** |
+| Baseline (unmodified DeepSORT, provided detections + mars) | 40.17 | - | - | - | - |
+| Modern (YOLOv8m + OSNet) | 52.54 | +12.37 | 6 / 6 | 9.87 | yes |
 
-The modernized tracker beats the unmodified baseline on **every** video while running real-time on a
-Colab T4. Full per-video numbers, the detector/REID studies, the body-REID clustering metrics, and a
-parameter-tuning case study are in the report.
+The modern configuration exceeds the unmodified baseline on each of the six videos while running in
+real time on a Colab T4. Per-video numbers, the detector and REID studies, the body-REID clustering
+metrics, and a parameter-tuning case study are given in the report.
 
-## What to look at
+## Repository contents
 
-| Deliverable | Path |
+| Item | Path |
 |---|---|
-| **Full report** (methods, all experiments incl. failures, results) | [`report/report.md`](report/report.md) · [`report/report.pdf`](report/report.pdf) |
-| Headline results table | [`report/results_table.md`](report/results_table.md) |
-| **Overlay videos** (required): unmodified baseline vs best config, MOT16-09 | [`overlays/baseline_MOT16-09.mp4`](overlays/baseline_MOT16-09.mp4) · [`overlays/best_MOT16-09.mp4`](overlays/best_MOT16-09.mp4) |
-| **Runnable Colab notebook** (install → data → baseline → studies → best → overlays) | [`notebooks/DeepSORT_Modern.ipynb`](notebooks/DeepSORT_Modern.ipynb) |
-| Detailed project README (architecture, how to run) | [`README_MODERN.md`](README_MODERN.md) |
-| Pluggable detectors / REID / body-REID / pipeline / eval | `detectors/` `reid/` `bodyreid/` `pipeline/` `eval/` `configs/` |
-| Experiment journal (traceability) | `results/experiments.csv` |
+| Report (methods, experiments including negative results, results) | [report/report.md](report/report.md), [report/report.pdf](report/report.pdf) |
+| Results table | [report/results_table.md](report/results_table.md) |
+| Overlay videos (unmodified baseline and best configuration, MOT16-09) | [overlays/baseline_MOT16-09.mp4](overlays/baseline_MOT16-09.mp4), [overlays/best_MOT16-09.mp4](overlays/best_MOT16-09.mp4) |
+| Colab notebook (install, data, baseline, studies, best configuration, overlays) | [notebooks/DeepSORT_Modern.ipynb](notebooks/DeepSORT_Modern.ipynb) |
+| Additional project notes (architecture, how to run) | [README_MODERN.md](README_MODERN.md) |
+| Detector / REID / body-REID / pipeline / evaluation packages | `detectors/`, `reid/`, `bodyreid/`, `pipeline/`, `eval/`, `configs/` |
+| Experiment journal | `results/experiments.csv` |
 
 ## How to run
 
-Open [`notebooks/DeepSORT_Modern.ipynb`](notebooks/DeepSORT_Modern.ipynb) in **Google Colab**
-(Runtime → GPU) and **Run all**: it clones this repo, installs deps, downloads MOT15/MOT16,
-reproduces the baseline + the modern pipeline, and renders the overlay videos. The SORT core
-(`deep_sort/`) is kept intact; everything modern plugs in behind `BaseDetector` / `BaseReIDExtractor`.
+Open [notebooks/DeepSORT_Modern.ipynb](notebooks/DeepSORT_Modern.ipynb) in Google Colab
+(Runtime -> GPU) and run all cells. The notebook clones this repository, installs dependencies,
+downloads MOT15 and MOT16, reproduces the baseline and the modern pipeline, and renders the overlay
+videos. The SORT core (`deep_sort/`) is unchanged; the modern components are added behind the
+`BaseDetector` and `BaseReIDExtractor` interfaces.
 
-> The original upstream DeepSORT README is preserved below for attribution and reproducibility.
+The original upstream DeepSORT README is retained below for attribution and reproducibility.
 
 ---
 

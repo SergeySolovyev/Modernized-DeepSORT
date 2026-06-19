@@ -1,6 +1,6 @@
 detector:
   name: nanodet
-  # NanoDet is installed from source (RangiLyu/nanodet, pinned commit) — see data/README.md.
+  # NanoDet is installed from source (RangiLyu/nanodet, pinned commit) - see data/README.md.
   config: third_party/nanodet/config/nanodet-plus-m_416.yml
   weights: third_party/nanodet/weights/nanodet-plus-m_416.pth
   conf: 0.35

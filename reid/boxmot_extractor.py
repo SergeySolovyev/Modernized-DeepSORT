@@ -1,11 +1,11 @@
-"""boxmot REID extractor — real OSNet (and other) weights with a clean pip install.
+"""boxmot REID extractor - real OSNet (and other) weights with a clean pip install.
 
 Used because KaiyangZhou's torchreid does not build on current Colab (numpy 2.x /
 setuptools). boxmot (`pip install boxmot`) bundles OSNet/LMBN/CLIP-ReID weights with
 auto-download and a simple feature API: `ReID(...)(crops) -> (N, D) L2-normalized`.
 
 Model is selected by the weights name, e.g. osnet_x1_0_msmt17.pt, osnet_x0_25_msmt17.pt,
-osnet_ain_x1_0_msmt17.pt — so multiple REID models come from this one clean source.
+osnet_ain_x1_0_msmt17.pt - so multiple REID models come from this one clean source.
 """
 import numpy as np
 

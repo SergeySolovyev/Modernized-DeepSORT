@@ -1,4 +1,4 @@
-"""Original DeepSORT appearance model (mars-small128) — 128-d BASELINE.
+"""Original DeepSORT appearance model (mars-small128) - 128-d BASELINE.
 
 Loads the TF1 frozen graph via tf.compat.v1 (works under TF2 in Colab). The graph
 input/output tensors are located by name suffix to tolerate the 'net/' import prefix.

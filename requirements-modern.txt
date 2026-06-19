@@ -1,4 +1,4 @@
-# Modernized DeepSORT — runtime dependencies (Python 3.10+, tested target: Colab Pro).
+# Modernized DeepSORT - runtime dependencies (Python 3.10+, tested target: Colab Pro).
 # Install per-need; detectors/reid backends are optional and lazily imported, so a
 # missing/broken backend never blocks the others.
 
@@ -12,7 +12,7 @@ tqdm>=4.64
 
 # --- detectors ---
 ultralytics>=8.1           # YOLOv8/v11 detection + YOLOv8-seg segmentation
-# nanodet                  # install from source (RangiLyu/nanodet, pinned commit) — see data/README
+# nanodet                  # install from source (RangiLyu/nanodet, pinned commit) - see data/README
 # mmdet>=3.2, mmcv>=2.1    # install via openmim last:  mim install mmengine mmcv mmdet
 
 # --- reid ---
@@ -25,10 +25,10 @@ torchvision>=0.15
 # (onnx/yolox) can fail egg_info on bleeding-edge runtimes, and must not abort this whole -r.
 timm>=0.9                  # REID source that always installs cleanly (the safe default)
 gdown                      # weight downloads
-# fastreid                 # optional extra source (JDAI-CV/fast-reid) — install from source
+# fastreid                 # optional extra source (JDAI-CV/fast-reid) - install from source
 
 # --- standalone body-REID index (optional, falls back to numpy brute force) ---
 faiss-cpu>=1.7             # ANN index for the identity database
 
 # --- evaluation ---
-# TrackEval is vendored/cloned separately (JonathonLuiten/TrackEval) — see data/download_mot.py
+# TrackEval is vendored/cloned separately (JonathonLuiten/TrackEval) - see data/download_mot.py

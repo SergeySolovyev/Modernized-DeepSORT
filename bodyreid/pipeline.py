@@ -1,4 +1,4 @@
-"""BodyReidRunner — the per-frame hook called by pipeline.runner after tracker.update.
+"""BodyReidRunner - the per-frame hook called by pipeline.runner after tracker.update.
 
 Maintains a persistent identity database (iid space) decoupled from the tracker's
 ephemeral track ids (tid space), healing fragmentation: when the tracker splits one

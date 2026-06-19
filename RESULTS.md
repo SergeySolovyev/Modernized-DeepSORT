@@ -1,10 +1,10 @@
 # Results & Reproducibility
 
-Modernized DeepSORT — person tracking with pluggable detectors and REID.
-This note records the **confirmed live result** on Colab Pro and the **exact
+Modernized DeepSORT - person tracking with pluggable detectors and REID.
+This note records the **verified result** on Colab Pro and the **exact
 copy-pasteable commands** to reproduce it now that the runtime fixes are in.
 
-## 1. Headline result (CONFIRMED, live run)
+## 1. Main result (verified, live run)
 
 Benchmark: **MOT16 combined** (MOT16-09 + MOT16-11), HOTA via TrackEval.
 
@@ -26,10 +26,10 @@ OSNet (the originally intended best REID) was **build-blocked** under numpy 2.x
 
 ## 2. Reproduce end-to-end on Colab Pro (copy-paste)
 
-Runtime: **GPU (T4)**, Python 3.12, numpy 2.x — the configuration these fixes
+Runtime: **GPU (T4)**, Python 3.12, numpy 2.x - the configuration these fixes
 were validated against.
 
-### Option A — the notebook (Run all)
+### Option A - the notebook (Run all)
 
 1. Open `notebooks/DeepSORT_Modern.ipynb` in Colab.
 2. Runtime -> Change runtime type -> **GPU**.
@@ -38,7 +38,7 @@ were validated against.
    studies -> best-combo tracking -> FPS -> body-REID -> overlays -> summary, and
    logs numbers to `results/experiments.csv`.
 
-### Option B — explicit commands
+### Option B - explicit commands
 
 ```bash
 # --- Clone + enter ---
@@ -98,7 +98,7 @@ These are the runtime realities discovered by actually running on Colab Pro
   `boxmot` both **fail to build** under numpy 2.x (`setup.py egg_info` /
   `metadata-generation-failed`). `timm` installs cleanly and is the **working
   default REID**. boxmot is installed **guarded** (`pip install boxmot || echo ...`)
-  so its failure can't break the core install — and it is **not** in
+  so its failure can't break the core install - and it is **not** in
   `requirements-modern.txt`'s `-r` set.
 - **OSNet needs a numpy<2 runtime.** Because OSNet ships via torchreid/boxmot,
   measuring it requires pinning a `numpy<2` environment. On stock Colab (numpy 2.x)
@@ -114,18 +114,18 @@ These are the runtime realities discovered by actually running on Colab Pro
   `eval/trackeval_runner.py` **auto-patches** `np.float` / `np.int` / `np.bool` in
   the TrackEval source before running.
 - **TrackEval empty-tracker guard.** TrackEval errors when asked to evaluate a
-  tracker with no result files — only pass trackers (`--trackers`) that produced output.
+  tracker with no result files - only pass trackers (`--trackers`) that produced output.
 
 ## 4. Pending a clean GPU re-run
 
-The headline numbers above are confirmed live. The following are wired up and
+The numbers above are verified. The following are wired up and
 runnable but not yet captured into a committed artifact:
 
 - **Full per-video HOTA table** (`results/experiments.csv` + `report/results_table.md`
   via `python -m eval.summarize`) across all sequences. The `results/` directory is
-  not yet populated in the repo — it is produced by a clean GPU run.
+  not yet populated in the repo - it is produced by a clean GPU run.
 - **Overlay videos** (`overlays/baseline_MOT16-09.mp4`, `overlays/best_MOT16-09.mp4`).
 - **Body-REID clustering numbers** (`cluster_eval` / `sweep` outputs for the
   standalone identity system).
-- **OSNet REID measurement** — requires a `numpy<2` runtime (see above); expected
+- **OSNet REID measurement** - requires a `numpy<2` runtime (see above); expected
   to exceed the timm result.

@@ -1,4 +1,4 @@
-"""Per-video tuning sweep for TUD-Campus (MOT15) — closes the last baseline gap.
+"""Per-video tuning sweep for TUD-Campus (MOT15) - addresses the remaining baseline gap.
 
 Context: the modern YOLOv8m+OSNet pipeline scored HOTA 39.65 < unmodified-baseline 39.86
 on TUD-Campus (the only video where it trailed). Root cause (verified): the shipped
@@ -9,7 +9,7 @@ per-video override mechanism (run_tracking has no --override flag).
 
 This sweeps detector/tracker levers by rewriting that one preset, re-running TUD-Campus, and
 reading the per-video HOTA back from the journal. The original preset is restored at the end;
-the winning preset is printed so it can be committed.
+the best preset is printed so it can be committed.
 
   python -m eval.tune_tud_campus            # GPU (Colab)
   python -m eval.tune_tud_campus cpu        # CPU
@@ -29,9 +29,9 @@ DEVICE = sys.argv[1] if len(sys.argv) > 1 else "cuda"
 # Each candidate is the exact configs/sequences/TUD-Campus.yaml content to test.
 # _deep_merge is per-key, so only the listed keys override default/detector/reid presets.
 #
-# SWEEP 1 (recall direction: imgsz up, conf down) was tried and FALSIFIED the recall
-# hypothesis — HOTA fell monotonically (imgsz960 39.65 -> 1280 35.0 -> 1536 29.7). More
-# detections HURT. SWEEP 2 (below) tries the OPPOSITE: fewer/cleaner detections. The live
+# SWEEP 1 (recall direction: imgsz up, conf down) was tried and did not support the recall
+# hypothesis - HOTA fell monotonically (imgsz960 39.65 -> 1280 35.0 -> 1536 29.7). More
+# detections reduced HOTA. SWEEP 2 (below) tries the opposite: fewer or cleaner detections. The live
 # pipeline runs with NO NMS (nms_max_overlap default 1.0 = off) and NO confidence gate
 # (tracker.min_confidence default 0.0), so duplicate/FP boxes on this dense crossing-ped
 # clip go straight into the tracker. These candidates add precision levers at imgsz=960.
@@ -86,16 +86,16 @@ def main():
                 fh.write(orig)
             print("\n(restored original %s)" % PRESET)
 
-    print("\n===== TUD-Campus tuning sweep -- baseline to beat = %.2f =====" % BASELINE_HOTA)
+    print("\n===== TUD-Campus tuning sweep -- baseline to exceed = %.2f =====" % BASELINE_HOTA)
     ranked = sorted(results.items(),
                     key=lambda kv: (kv[1] if kv[1] == kv[1] else -1.0), reverse=True)
     for name, h in ranked:
-        flag = "<-- BEATS baseline" if h == h and h > BASELINE_HOTA else ""
+        flag = "(above baseline)" if h == h and h > BASELINE_HOTA else ""
         print("%-34s HOTA %7.3f  %s" % (name, h, flag))
     if ranked and ranked[0][1] == ranked[0][1]:
         win, wh = ranked[0]
-        print("\nWINNER: %s  HOTA %.3f  (delta %+.3f vs baseline)" % (win, wh, wh - BASELINE_HOTA))
-        print("Winning preset content:\n%s" % CANDIDATES[win])
+        print("\nSelected: %s  HOTA %.3f  (delta %+.3f vs baseline)" % (win, wh, wh - BASELINE_HOTA))
+        print("Best preset content:\n%s" % CANDIDATES[win])
 
 
 if __name__ == "__main__":

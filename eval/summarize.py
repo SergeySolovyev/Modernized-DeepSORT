@@ -1,7 +1,7 @@
 """Summarize HOTA (or another metric) from results/experiments.csv into a markdown table.
 
 After the Colab run logs per-video HOTA, this builds the per-video comparison table for
-report/report.md (rows per tracker, columns per video + Mean, plus Δ vs the baseline).
+report/report.md (rows per tracker, columns per video + Mean, plus Delta vs the baseline).
 
   python -m eval.summarize                  # HOTA table for all trackers seen
   python -m eval.summarize --metric IDF1
