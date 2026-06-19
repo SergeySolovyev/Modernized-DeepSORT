@@ -19,8 +19,9 @@ parameter-tuning case study are in the report.
 
 | Deliverable | Path |
 |---|---|
-| **Full report** (methods, all experiments incl. failures, results) | [`report/report.md`](report/report.md) |
+| **Full report** (methods, all experiments incl. failures, results) | [`report/report.md`](report/report.md) · [`report/report.pdf`](report/report.pdf) |
 | Headline results table | [`report/results_table.md`](report/results_table.md) |
+| **Overlay videos** (required): unmodified baseline vs best config, MOT16-09 | [`overlays/baseline_MOT16-09.mp4`](overlays/baseline_MOT16-09.mp4) · [`overlays/best_MOT16-09.mp4`](overlays/best_MOT16-09.mp4) |
 | **Runnable Colab notebook** (install → data → baseline → studies → best → overlays) | [`notebooks/DeepSORT_Modern.ipynb`](notebooks/DeepSORT_Modern.ipynb) |
 | Detailed project README (architecture, how to run) | [`README_MODERN.md`](README_MODERN.md) |
 | Pluggable detectors / REID / body-REID / pipeline / eval | `detectors/` `reid/` `bodyreid/` `pipeline/` `eval/` `configs/` |
