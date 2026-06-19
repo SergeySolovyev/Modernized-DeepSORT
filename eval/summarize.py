@@ -61,12 +61,15 @@ def main():
     args = ap.parse_args()
 
     table = load_metric(args.journal, args.metric)
-    if not table:
-        print("No '%s' rows in %s yet (run tracking + trackeval first)." % (args.metric, args.journal))
-        return
-    md = build_markdown(table, args.metric)
-    print(md)
     os.makedirs(os.path.dirname(os.path.abspath(args.out)) or ".", exist_ok=True)
+    if not table:
+        md = "No '%s' rows in %s yet (run tracking + `trackeval_runner --per-seq` first)." % (
+            args.metric, args.journal)
+        print(md)
+    else:
+        md = build_markdown(table, args.metric)
+        print(md)
+    # Always write the file so downstream readers (the notebook) never hit a missing path.
     with open(args.out, "w", encoding="utf-8") as fh:
         fh.write("# %s per video\n\n%s\n" % (args.metric, md))
     print("\nwrote", args.out)

@@ -7,7 +7,7 @@ notebook preserves the "organized scripts, not notebooks" scoring point.
 import json
 import os
 
-DET, REID = "yolo", "osnet"   # default best combo (OSNet via boxmot; tune per video)
+DET, REID = "yolo", "timm_mobilenet"   # working default (boxmot/OSNet is build-blocked on numpy-2.x Colab)
 
 
 def md(text):
@@ -53,8 +53,8 @@ cells = [
     code("# 5) Baseline: unmodified DeepSORT (provided detections + mars-small128).\n"
          "# Requires third_party/deep_sort_data/mars-small128.pb (see data/README.md).\n"
          "!python -m eval.run_baseline --mars third_party/deep_sort_data/mars-small128.pb\n"
-         "!python -m eval.trackeval_runner --benchmark MOT15 --trackers baseline\n"
-         "!python -m eval.trackeval_runner --benchmark MOT16 --trackers baseline"),
+         "!python -m eval.trackeval_runner --benchmark MOT15 --trackers baseline --per-seq\n"
+         "!python -m eval.trackeval_runner --benchmark MOT16 --trackers baseline --per-seq"),
 
     md("## Detector study — Precision / Recall / F1 vs GT (IoU≥0.5)"),
     code("for det in ['yolo', 'nanodet', 'mmdet']:\n"
@@ -66,8 +66,8 @@ cells = [
     md("## Full pipeline — best combo, live tracking → HOTA"),
     code("DET, REID = '%s', '%s'\n" % (DET, REID) +
          "!python -m eval.run_tracking --detector $DET --reid $REID --device cuda\n"
-         "!python -m eval.trackeval_runner --benchmark MOT15 --trackers ${DET}__${REID}\n"
-         "!python -m eval.trackeval_runner --benchmark MOT16 --trackers ${DET}__${REID}"),
+         "!python -m eval.trackeval_runner --benchmark MOT15 --trackers ${DET}__${REID} --per-seq\n"
+         "!python -m eval.trackeval_runner --benchmark MOT16 --trackers ${DET}__${REID} --per-seq"),
 
     code("# FPS (must be >= 5 FPS for the real-time requirement)\n"
          "!python -m eval.fps_bench --detector $DET --reid $REID --sequence MOT16-09 --device cuda"),
@@ -87,14 +87,15 @@ cells = [
 
     md("## Overlays — baseline vs best"),
     code("import os; os.makedirs('overlays', exist_ok=True)\n"
-         "!python -m eval.make_overlays --detector gt   --reid mars  --sequence MOT16-09 --mode gtbox --out overlays/baseline_MOT16-09.mp4 --device cuda\n"
+         "# baseline overlay = render the unmodified-tracker's MOT output file (no models needed)\n"
+         "!python -m eval.make_overlays --sequence MOT16-09 --mot-file data/trackeval/trackers/mot_challenge/MOT16-train/baseline/data/MOT16-09.txt --out overlays/baseline_MOT16-09.mp4\n"
          "!python -m eval.make_overlays --detector $DET --reid $REID --sequence MOT16-09 --out overlays/best_MOT16-09.mp4 --device cuda"),
 
     md("## Results summary"),
     code("# Auto-build the per-video HOTA table (tracker x video + Mean, Delta vs baseline)\n"
          "!python -m eval.summarize\n"
-         "import pandas as pd\n"
-         "print(open('report/results_table.md').read())\n"
+         "import os, pandas as pd\n"
+         "print(open('report/results_table.md').read() if os.path.exists('report/results_table.md') else 'no results table yet')\n"
          "df = pd.read_csv('results/experiments.csv')\n"
          "df.tail(40)"),
 ]

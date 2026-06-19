@@ -32,8 +32,10 @@ def _parse_gt(path, pedestrian_classes=(1,), min_visibility=0.0):
         frame, tid = int(row[0]), int(row[1])
         x, y, w, h = row[2], row[3], row[4], row[5]
         flag = row[6] if ncol > 6 else 1.0
-        cls = int(row[7]) if ncol > 7 else -1
-        vis = row[8] if ncol > 8 else 1.0
+        # MOT16 gt is 9-col (..,class,visibility). MOT15/2DMOT2015 gt is 10-col where cols
+        # 7-9 are 3D world coords (-1 for 2D seqs) — NOT class/visibility. Only trust them at 9 cols.
+        cls = int(row[7]) if ncol == 9 else -1
+        vis = row[8] if ncol == 9 else 1.0
         if flag == 0:
             continue
         if pedestrian_classes and cls != -1 and cls not in pedestrian_classes:

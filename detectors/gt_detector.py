@@ -31,8 +31,10 @@ class GtDetector(BaseDetector):
             frame = int(row[0])
             x, y, w, h = row[2], row[3], row[4], row[5]
             flag = row[6] if ncol > 6 else 1.0          # MOT16 consider-flag / MOT15 conf
-            cls = int(row[7]) if ncol > 7 else -1       # MOT16 class
-            vis = row[8] if ncol > 8 else 1.0           # MOT16 visibility
+            # MOT16 gt is 9-col (class @7, visibility @8). MOT15 gt is 10-col where cols 7-9 are
+            # 3D world coords (-1) — NOT class/visibility. Only read them when exactly 9 columns.
+            cls = int(row[7]) if ncol == 9 else -1
+            vis = row[8] if ncol == 9 else 1.0
             if flag == 0:                                # explicitly ignored GT
                 continue
             if self.pedestrian_classes and cls != -1 and cls not in self.pedestrian_classes:
