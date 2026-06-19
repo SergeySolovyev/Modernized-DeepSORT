@@ -1,0 +1,16 @@
+# Normalize text to LF in the repository; mark binaries so they are never EOL-converted.
+* text=auto eol=lf
+
+*.pdf  binary
+*.mp4  binary
+*.avi  binary
+*.pb   binary
+*.pt   binary
+*.pth  binary
+*.onnx binary
+*.npz  binary
+*.npy  binary
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.zip  binary
