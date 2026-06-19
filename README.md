@@ -19,7 +19,8 @@ metrics, and a parameter-tuning case study are given in the report.
 
 | Item | Path |
 |---|---|
-| Report (methods, experiments including negative results, results) | [report/report.md](report/report.md), [report/report.pdf](report/report.pdf) |
+| Report (formatted PDF, built from LaTeX) | [report/report.pdf](report/report.pdf) (source: [report/latex/main.tex](report/latex/main.tex)) |
+| Report (Markdown source) | [report/report.md](report/report.md) |
 | Results table | [report/results_table.md](report/results_table.md) |
 | Overlay videos (unmodified baseline and best configuration, MOT16-09) | [overlays/baseline_MOT16-09.mp4](overlays/baseline_MOT16-09.mp4), [overlays/best_MOT16-09.mp4](overlays/best_MOT16-09.mp4) |
 | Colab notebook (install, data, baseline, studies, best configuration, overlays) | [notebooks/DeepSORT_Modern.ipynb](notebooks/DeepSORT_Modern.ipynb) |

@@ -1,0 +1,9 @@
+# LaTeX build artifacts (the compiled report is committed at ../report.pdf)
+*.aux
+*.log
+*.out
+*.toc
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+main.pdf
