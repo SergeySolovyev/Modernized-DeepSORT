@@ -50,6 +50,17 @@ other five sequences are untouched.
 
 YOLOv8 + OSNet: overall 9.87 FPS (det 30.9 / reid 30.6 / track 48.7), which meets the >=5 FPS real-time bar.
 
+## Segmentation (box detector vs mask detector, same OSNet REID)
+
+| detector | mean F1 | mean HOTA | mean FPS |
+|---|---|---|---|
+| yolo (box) | 0.740 | 51.45 | 14.68 |
+| yolo_seg (mask->bbox) | 0.749 | 51.86 | 8.91 |
+
+Mask-derived boxes are marginally tighter (F1 +0.009, HOTA +0.41) but the mask head
+roughly halves throughput; both stay above the 5 FPS real-time bar. The box detector is the
+default; segmentation is a switchable option (`--detector yolo_seg`).
+
 ## REID-only study (GT boxes -> HOTA isolates appearance)
 
 OSNet is the strongest appearance model (mean HOTA 89.93), narrowly ahead of timm (89.22),

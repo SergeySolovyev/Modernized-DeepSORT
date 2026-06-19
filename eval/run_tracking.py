@@ -1,10 +1,10 @@
 """Run the tracker over sequences and write MOT results into the TrackEval layout.
 
   # live tracking with a modern detector + REID
-  python -m eval.run_tracking --detector yolo --reid osnet_x1_0
+  python -m eval.run_tracking --detector yolo --reid osnet
 
   # REID-only mode: GT boxes, SORT detection disabled (isolate appearance)
-  python -m eval.run_tracking --detector gt --reid osnet_x1_0 --mode gtbox
+  python -m eval.run_tracking --detector gt --reid osnet --mode gtbox
 """
 import argparse
 import os
@@ -47,7 +47,7 @@ def run_sequence(detector_name, reid_name, seq, mode, data_root, device, body_re
 def main():
     ap = argparse.ArgumentParser(description="Run tracker -> MOT results (TrackEval layout)")
     ap.add_argument("--detector", default="yolo")
-    ap.add_argument("--reid", default="osnet_x1_0")
+    ap.add_argument("--reid", default="osnet")
     ap.add_argument("--sequences", nargs="*", default=EVAL_SEQUENCES)
     ap.add_argument("--mode", default="live", choices=["live", "gtbox"])
     ap.add_argument("--data-root", default="data/MOT")

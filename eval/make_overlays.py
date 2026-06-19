@@ -2,7 +2,7 @@
 
 Produce the two overlays the rubric requires (original baseline + best config):
   python -m eval.make_overlays --detector gt   --reid mars       --sequence MOT16-09 --out overlays/baseline_MOT16-09.mp4
-  python -m eval.make_overlays --detector yolo --reid osnet_x1_0 --sequence MOT16-09 --out overlays/best_MOT16-09.mp4
+  python -m eval.make_overlays --detector yolo --reid osnet --sequence MOT16-09 --out overlays/best_MOT16-09.mp4
 """
 import argparse
 import os
@@ -102,7 +102,7 @@ def _render_from_mot(seq_dir, mot_file, out_path):
 def main():
     ap = argparse.ArgumentParser(description="Render tracking overlay MP4")
     ap.add_argument("--detector", default="yolo")
-    ap.add_argument("--reid", default="osnet_x1_0")
+    ap.add_argument("--reid", default="osnet")
     ap.add_argument("--sequence", default="MOT16-09")
     ap.add_argument("--mode", default="live", choices=["live", "gtbox"])
     ap.add_argument("--out", required=True)

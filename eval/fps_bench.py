@@ -2,7 +2,7 @@
 
 Times detector / REID / tracker stages separately (after warmup) over one sequence.
 
-  python -m eval.fps_bench --detector yolo --reid osnet_x1_0 --sequence MOT16-09
+  python -m eval.fps_bench --detector yolo --reid osnet --sequence MOT16-09
 """
 import argparse
 import os
@@ -17,7 +17,7 @@ from reid.registry import build_reid
 def main():
     ap = argparse.ArgumentParser(description="FPS benchmark")
     ap.add_argument("--detector", default="yolo")
-    ap.add_argument("--reid", default="osnet_x1_0")
+    ap.add_argument("--reid", default="osnet")
     ap.add_argument("--sequence", default="MOT16-09")
     ap.add_argument("--data-root", default="data/MOT")
     ap.add_argument("--device", default="cuda")

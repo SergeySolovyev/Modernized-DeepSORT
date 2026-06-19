@@ -3,10 +3,10 @@
 Examples
 --------
     # live tracking, write MOT results
-    python run.py --detector yolo --reid osnet_x1_0 --sequence MOT16-09
+    python run.py --detector yolo --reid osnet --sequence MOT16-09
 
     # REID-only mode (GT boxes, SORT detection disabled) to isolate appearance
-    python run.py --detector gt --reid osnet_x1_0 --sequence TUD-Campus --mode gtbox
+    python run.py --detector gt --reid osnet --sequence TUD-Campus --mode gtbox
 
     # per-run overrides
     python run.py --detector yolo --reid resnet50 --sequence KITTI-17 \
@@ -33,7 +33,7 @@ def resolve_sequence_dir(cfg, args):
 def parse_args():
     ap = argparse.ArgumentParser(description="Modernized DeepSORT runner")
     ap.add_argument("--detector", default="yolo", help="detector preset (configs/detectors/*.yaml)")
-    ap.add_argument("--reid", default="osnet_x1_0", help="reid preset (configs/reid/*.yaml)")
+    ap.add_argument("--reid", default="osnet", help="reid preset (configs/reid/*.yaml)")
     ap.add_argument("--sequence", default=None, help="MOT sequence name (resolved under data_root)")
     ap.add_argument("--sequence-dir", default=None, help="explicit path to a MOT sequence directory")
     ap.add_argument("--mode", default="live", choices=["live", "gtbox"])

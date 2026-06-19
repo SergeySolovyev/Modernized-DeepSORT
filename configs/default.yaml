@@ -20,5 +20,7 @@ tracker:
 detector:
   name: yolo
 reid:
-  name: torchreid
+  name: boxmot                   # runnable default (OSNet via boxmot); timm_mobilenet is the no-boxmot fallback
+  weights: osnet_x1_0_msmt17.pt
+  half: false
   crop_pad: 0.0                  # fractional padding added around each crop before REID
