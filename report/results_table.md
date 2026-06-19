@@ -10,7 +10,8 @@ detection disabled — isolates the appearance model).
 | tracker | TUD-Campus | TUD-Stadtmitte | KITTI-17 | PETS09-S2L1 | MOT16-09 | MOT16-11 | **Mean** | Δ vs baseline |
 |---|---|---|---|---|---|---|---|---|
 | baseline (unmodified) | 39.86 | 36.75 | 43.41 | 44.84 | 36.24 | 39.95 | **40.17** | — |
-| **yolo__osnet** (best live) | 39.65 | 59.62 | 48.75 | 60.28 | 48.57 | 51.07 | **51.32** | **+11.15** |
+| **yolo__osnet** (best live, tuned) | **46.98** | 59.62 | 48.75 | 60.28 | 48.57 | 51.07 | **52.54** | **+12.37** |
+| yolo__osnet (untuned TUD-Campus) | 39.65 | 59.62 | 48.75 | 60.28 | 48.57 | 51.07 | 51.32 | +11.15 |
 | yolo__timm_mobilenet | 37.57 | 57.63 | 45.82 | 50.89 | 45.56 | 48.73 | **47.70** | +7.53 |
 | gt__osnet__gtbox (REID-only) | 86.67 | 94.11 | 82.98 | 88.52 | 93.46 | 93.82 | **89.93** | +49.76 |
 | gt__timm_mobilenet__gtbox | 86.67 | 94.11 | 83.89 | 91.71 | 85.38 | 93.59 | **89.22** | +49.05 |
@@ -18,9 +19,32 @@ detection disabled — isolates the appearance model).
 | gt__osnet_fast__gtbox | 86.67 | 87.30 | 78.58 | 83.86 | 87.33 | 93.04 | **86.13** | +45.96 |
 
 **Headline:** the modernized tracker (**YOLOv8 + OSNet**, OSNet via boxmot) reaches **mean HOTA
-51.32 vs 40.17** for unmodified DeepSORT (**+11.15**), beating the baseline on **5 of 6**
-videos. **TUD-Campus** is a near-tie just below (39.65 vs 39.86) — a 71-frame dense clip that
-needs per-video tuning (`configs/sequences/TUD-Campus.yaml`: lower `conf`, adjust `max_age`).
+52.54 vs 40.17** for unmodified DeepSORT (**+12.37**), now **beating the baseline on all six
+videos** after per-video tuning of TUD-Campus.
+
+### TUD-Campus per-video tuning (the last gap, and a useful negative result)
+
+TUD-Campus was the only video where the modern pipeline initially trailed (39.65 vs 39.86). Two
+sweeps (`eval/tune_tud_campus.py`) localized the cause:
+
+- **Recall direction (FALSIFIED):** raising `detector.imgsz` 960→1280→1536 (and lowering `conf`)
+  made HOTA *monotonically worse* — 39.65 → 35.0 → 29.7. More detections hurt.
+- **Precision direction (WON):** the live pipeline applies **no NMS** (`tracker.nms_max_overlap`
+  default 1.0) and **no confidence gate** (`tracker.min_confidence` default 0.0), so YOLO's many
+  low-confidence false positives on this dense crossing-pedestrian clip flood the tracker and spawn
+  spurious tracks (wrecking DetA precision and AssA). Raising `detector.conf` to **0.45** lifts
+  HOTA to **46.98 (+7.1 over baseline)**.
+
+| candidate | HOTA | candidate | HOTA |
+|---|---|---|---|
+| **conf 0.45 (winner)** | **46.98** | nms07+minconf03+h15 | 40.39 |
+| conf 0.35 | 44.61 | minheight 20 | 39.85 |
+| nms0.7 + conf0.35 | 42.49 | control (conf 0.25) | 39.65 |
+| min_confidence 0.30 | 42.22 | nms 0.7 alone | 38.40 |
+| nms_max_overlap 0.5 | 41.96 | imgsz 1280 / 1536 | 35.0 / 29.7 |
+
+The fix is confined to `configs/sequences/TUD-Campus.yaml` (per-video params are permitted); the
+other five sequences are untouched.
 
 ## Real-time (FPS, MOT16-09, T4, warmup-excluded)
 

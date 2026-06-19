@@ -1,8 +1,16 @@
 # TUD-Campus (MOT15): 71 frames, ~640x480, dense crossing pedestrians, static cam.
-# Starting points — tune against HOTA/FPS.
+# Per-video tuning (permitted by the assignment). TUNED 2026-06-19 via eval.tune_tud_campus.
+#
+# Finding: this was the only video where YOLOv8m+OSNet trailed the baseline (39.65 vs 39.86).
+# A recall-direction sweep (imgsz 960->1280->1536, conf down) made HOTA *worse* monotonically
+# (39.65 -> 35.0 -> 29.7) — more detections hurt. Root cause: the live pipeline applies NO NMS
+# (tracker.nms_max_overlap default 1.0) and NO confidence gate (tracker.min_confidence default
+# 0.0), so YOLO's many low-confidence false positives on this dense clip flood the tracker,
+# spawning spurious tracks that wreck DetA precision and AssA. The precision-direction sweep
+# confirmed it: raising detector.conf to 0.45 lifts HOTA to 46.98 (+7.1 over baseline).
 detector:
-  imgsz: 960          # low-res source; smaller net is faster with no quality loss
-  conf: 0.25
+  imgsz: 960          # full source res; raising it adds FPs here (see note above)
+  conf: 0.45          # high gate -> keep only confident detections (the key lever: 39.65 -> 46.98)
 tracker:
   n_init: 2           # short clip -> confirm tracks faster
   max_age: 20
