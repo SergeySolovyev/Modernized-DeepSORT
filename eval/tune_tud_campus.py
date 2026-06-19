@@ -28,34 +28,25 @@ DEVICE = sys.argv[1] if len(sys.argv) > 1 else "cuda"
 
 # Each candidate is the exact configs/sequences/TUD-Campus.yaml content to test.
 # _deep_merge is per-key, so only the listed keys override default/detector/reid presets.
+#
+# SWEEP 1 (recall direction: imgsz up, conf down) was tried and FALSIFIED the recall
+# hypothesis — HOTA fell monotonically (imgsz960 39.65 -> 1280 35.0 -> 1536 29.7). More
+# detections HURT. SWEEP 2 (below) tries the OPPOSITE: fewer/cleaner detections. The live
+# pipeline runs with NO NMS (nms_max_overlap default 1.0 = off) and NO confidence gate
+# (tracker.min_confidence default 0.0), so duplicate/FP boxes on this dense crossing-ped
+# clip go straight into the tracker. These candidates add precision levers at imgsz=960.
+_BASE = "detector:\n  imgsz: 960\n  conf: %s\n" \
+        "tracker:\n  n_init: 2\n  max_age: 20\n  max_cosine_distance: 0.2\n%s"
 CANDIDATES = {
-    "control_imgsz960":
-        "detector:\n  imgsz: 960\n  conf: 0.25\n"
-        "tracker:\n  n_init: 2\n  max_age: 20\n  max_cosine_distance: 0.2\n",
-    "imgsz1280":
-        "detector:\n  imgsz: 1280\n  conf: 0.25\n"
-        "tracker:\n  n_init: 2\n  max_age: 20\n  max_cosine_distance: 0.2\n",
-    "imgsz1536":
-        "detector:\n  imgsz: 1536\n  conf: 0.25\n"
-        "tracker:\n  n_init: 2\n  max_age: 20\n  max_cosine_distance: 0.2\n",
-    "imgsz1280_conf020":
-        "detector:\n  imgsz: 1280\n  conf: 0.20\n"
-        "tracker:\n  n_init: 2\n  max_age: 20\n  max_cosine_distance: 0.2\n",
-    "imgsz1280_conf015":
-        "detector:\n  imgsz: 1280\n  conf: 0.15\n"
-        "tracker:\n  n_init: 2\n  max_age: 20\n  max_cosine_distance: 0.2\n",
-    "imgsz1280_conf020_iou085":
-        "detector:\n  imgsz: 1280\n  conf: 0.20\n  iou: 0.85\n"
-        "tracker:\n  n_init: 2\n  max_age: 20\n  max_cosine_distance: 0.2\n",
-    "imgsz1536_conf015_iou085":
-        "detector:\n  imgsz: 1536\n  conf: 0.15\n  iou: 0.85\n"
-        "tracker:\n  n_init: 2\n  max_age: 20\n  max_cosine_distance: 0.2\n",
-    "imgsz1280_conf020_age30_ninit1":
-        "detector:\n  imgsz: 1280\n  conf: 0.20\n"
-        "tracker:\n  n_init: 1\n  max_age: 30\n  max_cosine_distance: 0.2\n",
-    "imgsz1536_conf020_age25_iou08":
-        "detector:\n  imgsz: 1536\n  conf: 0.20\n  iou: 0.80\n"
-        "tracker:\n  n_init: 2\n  max_age: 25\n  max_cosine_distance: 0.2\n",
+    "control_imgsz960":      _BASE % ("0.25", ""),
+    "conf035":               _BASE % ("0.35", ""),
+    "conf045":               _BASE % ("0.45", ""),
+    "nms07":                 _BASE % ("0.25", "  nms_max_overlap: 0.7\n"),
+    "nms05":                 _BASE % ("0.25", "  nms_max_overlap: 0.5\n"),
+    "minconf030":            _BASE % ("0.25", "  min_confidence: 0.30\n"),
+    "minheight20":           _BASE % ("0.25", "  min_detection_height: 20\n"),
+    "nms07_conf035":         _BASE % ("0.35", "  nms_max_overlap: 0.7\n"),
+    "nms07_minconf03_h15":   _BASE % ("0.25", "  nms_max_overlap: 0.7\n  min_confidence: 0.30\n  min_detection_height: 15\n"),
 }
 
 
