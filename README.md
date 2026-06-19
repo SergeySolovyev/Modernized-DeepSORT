@@ -1,4 +1,43 @@
-# Deep SORT
+# Modernized DeepSORT — HSE "Deep Learning for CV" final project
+
+This repository **modernizes the original DeepSORT** (`nwojke/deep_sort`, preserved below and in
+the git history) into a configurable, real-time multi-object tracker with pluggable modern
+detectors, REID models, and a segmentation path — plus a standalone body-REID identity system.
+
+## Headline result (HOTA, TrackEval, six MOT-Challenge videos)
+
+| Configuration | mean HOTA | Δ vs baseline | per-video wins | FPS | real-time |
+|---|---|---|---|---|---|
+| Baseline — unmodified DeepSORT (provided det + mars) | 40.17 | — | — | — | — |
+| **Modern — YOLOv8m + OSNet** | **52.54** | **+12.37** | **6 / 6** | **9.87** | **YES** |
+
+The modernized tracker beats the unmodified baseline on **every** video while running real-time on a
+Colab T4. Full per-video numbers, the detector/REID studies, the body-REID clustering metrics, and a
+parameter-tuning case study are in the report.
+
+## What to look at
+
+| Deliverable | Path |
+|---|---|
+| **Full report** (methods, all experiments incl. failures, results) | [`report/report.md`](report/report.md) |
+| Headline results table | [`report/results_table.md`](report/results_table.md) |
+| **Runnable Colab notebook** (install → data → baseline → studies → best → overlays) | [`notebooks/DeepSORT_Modern.ipynb`](notebooks/DeepSORT_Modern.ipynb) |
+| Detailed project README (architecture, how to run) | [`README_MODERN.md`](README_MODERN.md) |
+| Pluggable detectors / REID / body-REID / pipeline / eval | `detectors/` `reid/` `bodyreid/` `pipeline/` `eval/` `configs/` |
+| Experiment journal (traceability) | `results/experiments.csv` |
+
+## How to run
+
+Open [`notebooks/DeepSORT_Modern.ipynb`](notebooks/DeepSORT_Modern.ipynb) in **Google Colab**
+(Runtime → GPU) and **Run all**: it clones this repo, installs deps, downloads MOT15/MOT16,
+reproduces the baseline + the modern pipeline, and renders the overlay videos. The SORT core
+(`deep_sort/`) is kept intact; everything modern plugs in behind `BaseDetector` / `BaseReIDExtractor`.
+
+> The original upstream DeepSORT README is preserved below for attribution and reproducibility.
+
+---
+
+# Deep SORT (original upstream README)
 
 ## Introduction
 
