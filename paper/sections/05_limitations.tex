@@ -1,0 +1,41 @@
+\section{Limitations}
+\label{sec:limitations}\label{sec:difficulties}
+
+Our evidence comes from six MOT-Challenge training-split videos
+\cite{leal2015mot15,milan2016mot16}; there is no held-out test-split HOTA,
+since the public benchmarks withhold test ground truth and we required it for
+the per-clip detector-precision and association-isolation analyses. We
+therefore report our findings as \textbf{per-clip and correlational rather
+than as a universal law}: the link between low detector precision on dense,
+low-resolution clips and the ``more detections hurt'' regime is consistent
+across the sequences we audit (\cref{tab:detector,tab:sweep}), but six clips
+cannot establish a calibrated precision threshold that transfers to arbitrary
+domains. The practical guideline of \cref{sec:tuning} should be read as a
+tuning heuristic, not a tuned constant.
+
+A reviewer may object that restoring the original DeepSORT confidence and NMS
+gate is ``self-inflicted'': we re-broke a filter the method already had, then
+claimed credit for re-adding it. We address this head-on. The contribution is
+not the gate itself but the \emph{audit} of what a routine modernization
+silently discards: swapping in a modern detector and re-identification model
+\cite{jocher2023yolov8,zhou2019osnet} quietly drops the gating contract, and
+the resulting regression is invisible in mean HOTA yet large and predictable
+per clip. The finding is also specific in mechanism. It concerns ungated
+low-confidence detections \emph{instantiating spurious new tracks}, which is
+distinct from ByteTrack \cite{zhang2022bytetrack}, where low-confidence boxes
+are retained but only \emph{associated} to existing tracks and never seed new
+ones. That distinction is what makes the result a property of the gating
+contract rather than a tautology.
+
+Detector and re-identification coverage is narrow. Two additional detector
+backends, NanoDet and RTMDet, were unbuildable on our runtime (the NumPy-2.x
+and ground-truth column-format issues of \cref{sec:difficulties}), so the
+detection-side claims rest on a single live detector and cannot speak to
+cross-detector generality. Likewise the live pipeline uses one
+re-identification family; the OSNet-versus-timm comparison
+\cite{zhou2019osnet,wightman2019timm} isolates association only under
+ground-truth boxes, so appearance robustness under real detections, and across
+other re-identification architectures, remains untested. Confirming the
+precision-gating guideline against modern DeepSORT descendants
+\cite{du2023strongsort,cao2023ocsort,aharon2022botsort} on full benchmark
+splits is left to future work.

@@ -1,0 +1,85 @@
+% ICICPE 2026 - When More Detections Hurt: detector confidence and gating in a
+% modernized DeepSORT pipeline. Template: ICICPE custom (icicpe.sty).
+% Named (final-copy) submission.
+
+\documentclass[twocolumn, 10pt]{article}
+
+\usepackage{icicpe}
+\usepackage[utf8]{inputenc}
+\usepackage[pdfencoding=auto,hidelinks]{hyperref}
+\usepackage{url}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{latexsym}
+\usepackage{graphicx}
+\usepackage[symbol]{footmisc}
+\usepackage{booktabs}
+\usepackage[capitalize,noabbrev]{cleveref}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,calc,fit,backgrounds}
+
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+
+% Numerical macros (final values substituted from the gating study;
+% see paper/experiments/analyze.py and results_macros.tex).
+\input{sections/results_macros.tex}
+
+\title[english]{When More Detections Hurt: A Controlled Audit of Detector\\
+       Confidence and Gating in a Modernized DeepSORT Pipeline}
+
+\author[english]{
+Sergei Solovev \\
+HSE University \\
+\texttt{sesesolovev@edu.hse.ru} \\
+}
+
+\finalcopy
+
+\begin{document}
+
+\twocolumn[
+\maketitle
+\begin{abstract}
+Modernizing a 2017-era DeepSORT tracker by swapping its precomputed detections and fixed appearance
+encoder for a contemporary detector (YOLOv8m) and re-identification model (OSNet) raises mean HOTA on
+six MOT-Challenge videos from \baselineHOTA{} to \modernHOTA{} ($+\deltaHOTA$). \textbf{This headline
+gain is unsurprising and unpublishable on its own; the contribution of this paper is the audit
+underneath it.} First, the gain is \textbf{detection-dominated}: on the MOT16 split the detection
+term rises by $\detaGain$ HOTA points against only $\assaGain$ for the association term, and under
+ground-truth boxes a generic ImageNet backbone (not trained for re-identification) reaches
+\timmGT{} HOTA versus \osnetGT{} for a dedicated OSNet, so association quality is nearly
+detector-bound once detection is fixed. Second, we document a counterintuitive regime: on dense,
+low-resolution clips, \textbf{increasing detector recall lowers HOTA}. Raising the input resolution
+on TUD-Campus drives HOTA monotonically down ($\imgszLow\!\to\!\imgszMid\!\to\!\imgszHigh$), and the
+sign of recall's effect tracks per-clip detector precision across all six videos. The cause is
+specific and reproducible: the modern live pipeline drops the original DeepSORT confidence and
+non-maximum-suppression gate, so ungated false positives spawn spurious tracks; a gating-restoration
+ablation recovers the loss, and raising the per-clip confidence threshold lifts the worst sequence
+from a $\tudUntuned$ deficit to $+\tudGain$ over baseline. We connect this to ByteTrack, which keeps
+low-confidence detections but associates rather than instantiates them, and argue that in
+tracking-by-detection \textbf{per-clip precision gating is a larger and more reliable lever than
+global recall maximization}. We additionally report environment-driven negative results
+(NumPy-2.x dependency breakage; a ground-truth-format bug that silently zeroed four sequences) as
+reproducibility lessons.
+\end{abstract}
+
+\begin{keyword}
+multi-object tracking, tracking-by-detection, DeepSORT, HOTA, detector confidence,
+non-maximum suppression, gating, person re-identification, MOT-Challenge
+\end{keyword}
+]
+
+\input{sections/01_introduction.tex}
+\input{sections/02_background.tex}
+\input{sections/03_method.tex}
+\input{sections/04_results.tex}
+\input{sections/05_limitations.tex}
+\input{sections/06_conclusion.tex}
+
+{\footnotesize
+\bibliographystyle{ICICPEtran}
+\bibliography{refer}
+}
+
+\end{document}

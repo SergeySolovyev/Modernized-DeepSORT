@@ -1,0 +1,93 @@
+\section{System and Experimental Protocol}
+\label{sec:method}
+
+\subsection{Modernized Pluggable System}
+
+We modernize the reference DeepSORT implementation \cite{bewley2016sort,wojke2017deepsort}
+along exactly two axes -- detection and appearance -- while leaving the tracking core untouched.
+The original codebase consumes \emph{precomputed} detections from disk and a fixed appearance
+encoder. We replace both with pluggable, swappable adapters selected by name at run time: a
+detector front-end and a re-identification (REID) front-end, each registered through a small
+registry so a tracker is specified as a (detector, REID) pair. In this paper the detector is
+YOLOv8m \cite{jocher2023yolov8} and the REID model is either OSNet \cite{zhou2019osnet} (trained
+for person re-identification) or a generic ImageNet \texttt{timm} backbone \cite{wightman2019timm}
+(\emph{not} trained for re-identification), used as a deliberately weak appearance baseline.
+
+The SORT core is preserved verbatim: an 8-dimensional constant-velocity Kalman filter, Hungarian
+assignment, and a cascaded matcher that combines a Mahalanobis motion gate with a cosine
+\emph{appearance} gate over REID descriptors. Its track lifecycle (confirmation after $n_{\text{init}}$
+hits, deletion after $\text{max\_age}$ misses) is unchanged. The integration contract between the
+modern front-ends and this core is a single value object: each detection is a
+\texttt{Detection(tlwh, confidence, feature)} -- a top-left/width-height box, a scalar detector
+confidence, and an appearance vector -- and the per-frame loop is the original
+\texttt{tracker.predict()} followed by \texttt{tracker.update(detections)}. Because the contract and
+the core are fixed, any change in tracking quality is attributable to the detector, the REID model,
+or the pre-tracker \emph{gating} that decides which detections reach \texttt{update()}.
+
+\paragraph{The dropped gate.}
+This last point is central. In the original pipeline, precomputed detections passed through a fixed
+gate before reaching the tracker: a confidence threshold ($\text{min\_confidence}$), a
+non-maximum-suppression (NMS) step on overlapping boxes, and a minimum box-height filter. The
+modern live pipeline runs the detector \emph{inside} the loop, and its default configuration
+\textbf{drops this gate}: $\text{min\_confidence}=0.0$ and $\text{nms\_max\_overlap}=1.0$, which
+disables both the confidence filter and the secondary NMS (on the assumption that the detector's own
+internal NMS and \texttt{conf} threshold suffice). Every YOLO detection above the detector's own
+low internal threshold is therefore lifted directly into a \texttt{Detection} and offered to the
+tracker. This single configuration change -- not any change to the Kalman filter or the matcher -- is
+the regression we audit in \cref{sec:results}: ungated low-confidence boxes are free to instantiate
+spurious new tracks. The gate itself is still present in the code path (the same confidence filter
+plus NMS that the original used), merely disabled by default, which makes the restoration ablation
+below a one-line configuration change rather than a code change.
+
+\subsection{Evaluation Protocol}
+
+We evaluate on six MOT-Challenge training sequences spanning two benchmarks: TUD-Campus,
+TUD-Stadtmitte, KITTI-17, and PETS09-S2L1 from 2D MOT 2015 \cite{leal2015mot15}, and MOT16-09 and
+MOT16-11 from MOT16 \cite{milan2016mot16}. The set deliberately mixes clean, sparse scenes with
+dense, low-resolution ones, since per-clip density is the axis along which our central effect
+reverses sign. The primary metric is HOTA \cite{luiten2021hota}, computed by the official TrackEval
+toolkit \cite{luiten2020trackeval}; we report its DetA and AssA sub-scores when decomposing detection
+versus association. All trackers run in real time on this hardware (mean \fpsRealtime{}~FPS).
+
+\subsection{Controlled Experimental Design}
+
+The experiments are designed so that each varies one lever while holding the others fixed.
+
+\paragraph{(a) Detection-vs-association decomposition (GT-box, REID-only).}
+To separate the modernization gain into a detection component and an association component, we run a
+\emph{ground-truth-box} mode in which the detector is replaced by an oracle that emits the ground-truth
+boxes, with the confidence/NMS gate skipped. Detection is then perfect and identical across runs, so
+the only free variable is the REID model feeding the appearance gate. Comparing OSNet against the
+\texttt{timm} backbone in this mode (\osnetGT{} vs.\ \timmGT{} HOTA) isolates how much association
+quality the appearance model contributes once detection is held perfect; comparing the same models in
+the full pipeline against this ceiling reveals how detector-bound association quality is in practice.
+
+\paragraph{(b) Per-video detector-confidence sweep.}
+For each of the six videos we sweep the YOLO confidence threshold over
+$\{0.15, 0.25, 0.35, 0.45\}$, holding the detector, REID model, input size, and SORT core fixed. This
+is the precision/recall lever: lowering the threshold raises recall and lowers precision. We pair the
+HOTA response with the detector's per-clip precision at conf~0.25 to test whether the \emph{sign} of
+recall's effect on HOTA is predicted by per-clip precision.
+
+\paragraph{(c) Input-size sweep on the two dense clips.}
+On the two dense, low-resolution clips (TUD-Campus and KITTI-17), where YOLO precision is low, we
+additionally sweep the detector input resolution over $\{960, 1280, 1536\}$. Larger input recovers
+more small instances -- an \emph{orthogonal} recall lever to the confidence threshold -- and lets us
+check that the "more detections hurt'' effect is a property of recall itself, not of any one knob.
+
+\paragraph{(d) Gating-restoration ablation.}
+To attribute the regression specifically to the dropped gate, we restore the original DeepSORT
+contract -- $\text{min\_confidence}=0.3$ together with NMS at overlap~0.7 -- on top of the otherwise
+unchanged modern pipeline, and re-measure HOTA on each video. This is the same gate the original used,
+re-enabled by configuration alone, so any recovered HOTA is causally attributable to the gate and not
+to a confounding code change.
+
+\paragraph{Reproducibility.}
+Every run -- each detector preset, REID model, confidence level, input size, and ablation -- appends
+one row to a versioned CSV journal recording the configuration and resulting metrics, so the full
+experimental history is traceable and the figures in \cref{sec:results} are regenerable from it. The
+sweep harness writes each result immediately and skips configurations already present, so an
+interrupted run resumes without recomputation. We also note two environment-level pitfalls that the
+journal helped surface and that we report as negative results in \cref{sec:limitations}: a NumPy-2.x
+incompatibility that breaks the torchreid/boxmot/TrackEval build chain, and a 2D~MOT~2015-vs-MOT16
+ground-truth column-format mismatch that silently zeroed four sequences until corrected.

@@ -1,0 +1,30 @@
+% Numeric results. Verified values are set; the six-video gating-sweep summary
+% macros are filled from paper/experiments/gating_study.csv by analyze.py.
+
+% --- headline / decomposition (verified) ---
+\newcommand{\baselineHOTA}{40.17}
+\newcommand{\modernHOTA}{52.54}
+\newcommand{\deltaHOTA}{12.37}
+\newcommand{\detaGain}{+12.30}
+\newcommand{\assaGain}{+6.25}
+\newcommand{\baselineMOTA}{46.34}
+\newcommand{\modernMOTA}{46.75}
+
+% --- REID-only (GT boxes) ---
+\newcommand{\osnetGT}{89.93}
+\newcommand{\timmGT}{89.22}
+\newcommand{\osnetainGT}{87.33}
+
+% --- TUD-Campus single-clip sweep (verified) ---
+\newcommand{\imgszLow}{39.65}      % imgsz 960
+\newcommand{\imgszMid}{35.0}       % imgsz 1280
+\newcommand{\imgszHigh}{29.7}      % imgsz 1536
+\newcommand{\tudUntuned}{-0.21}    % untuned modern vs baseline on TUD-Campus
+\newcommand{\tudGain}{7.1}         % conf 0.45 tuned vs baseline (46.98 vs 39.86)
+\newcommand{\fpsRealtime}{9.87}
+
+% --- six-video gating sweep (filled by analyze.py from gating_study.csv) ---
+\newcommand{\nVideos}{6}
+\newcommand{\nHurt}{TBD}           % videos where raising recall lowers HOTA
+\newcommand{\corrPearson}{TBD}     % corr( d(HOTA)/d(conf) , per-clip precision )
+\newcommand{\ablationRecover}{TBD} % mean HOTA recovered by restoring the gate (dense clips)
