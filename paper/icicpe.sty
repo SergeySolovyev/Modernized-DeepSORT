@@ -3,7 +3,7 @@
 %http://icicpe.org/
 % It is modified from the style files for ACL and NIPS.
 
-\usepackage[hangul]{kotex}
+% \usepackage[hangul]{kotex}  % removed: this paper is English-only; avoids the kotex/Korean-font dependency
 \usepackage{fancyhdr}       % control header and footer
 
 \renewcommand{\topfraction}{0.95}   % let figure take up nearly whole page
@@ -64,7 +64,7 @@ labelsep = period}
 \@onlypreamble{\title}
 
 
-\renewcommand{\author}[3][english]{%
+\renewcommand{\author}[2][english]{%
     % \ifthenelse{\equal{#1}{korean}}
     %     {\newcommand{\@authorKor}{#2}}{}%
     \ifthenelse{\equal{#1}{english}}
