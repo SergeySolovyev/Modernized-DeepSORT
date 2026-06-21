@@ -49,17 +49,18 @@ underneath it.} First, the gain is \textbf{detection-dominated}: on the MOT16 sp
 term rises by $\detaGain$ HOTA points against only $\assaGain$ for the association term, and under
 ground-truth boxes a generic ImageNet backbone (not trained for re-identification) reaches
 \timmGT{} HOTA versus \osnetGT{} for a dedicated OSNet, so association quality is nearly
-detector-bound once detection is fixed. Second, we document a counterintuitive regime: on dense,
-low-resolution clips, \textbf{increasing detector recall lowers HOTA}. Raising the input resolution
-on TUD-Campus drives HOTA monotonically down ($\imgszLow\!\to\!\imgszMid\!\to\!\imgszHigh$), and the
-sign of recall's effect tracks per-clip detector precision across all six videos. The cause is
-specific and reproducible: the modern live pipeline drops the original DeepSORT confidence and
-non-maximum-suppression gate, so ungated false positives spawn spurious tracks; a gating-restoration
-ablation recovers the loss, and raising the per-clip confidence threshold lifts the worst sequence
-from a $\tudUntuned$ deficit to $+\tudGain$ over baseline. We connect this to ByteTrack, which keeps
-low-confidence detections but associates rather than instantiates them, and argue that in
-tracking-by-detection \textbf{per-clip precision gating is a larger and more reliable lever than
-global recall maximization}. We additionally report environment-driven negative results
+detector-bound once detection is fixed. Second, the mean hides a regression: at its default gate the
+modernized tracker scores below the 2017 baseline on the least-precise clip (TUD-Campus, $35.0$ vs.\
+$39.9$ HOTA). We trace this to a counterintuitive regime: across \textbf{all six videos, lowering the
+detector confidence gate (admitting more low-confidence detections) never raises and usually lowers
+HOTA}, and the size of the penalty tracks per-clip detector precision (Pearson $r = \corrPearson$).
+The cause is specific and reproducible: the modern live pipeline drops the original DeepSORT confidence
+and non-maximum-suppression gate, so ungated false positives spawn spurious tracks; a
+gating-restoration ablation recovers the loss, and raising the per-clip confidence threshold lifts the
+worst sequence from a $\tudUntuned$-point deficit to $+\tudGain$ over baseline. We connect this to
+ByteTrack, which keeps low-confidence detections but associates rather than instantiates them, and
+argue that in tracking-by-detection \textbf{per-clip precision gating is a larger and more reliable
+lever than global recall maximization}. We additionally report environment-driven negative results
 (NumPy-2.x dependency breakage; a ground-truth-format bug that silently zeroed four sequences) as
 reproducibility lessons.
 \end{abstract}

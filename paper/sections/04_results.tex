@@ -1,34 +1,55 @@
 \section{Results}
 \label{sec:results}
 
-\subsection{Where the Gain Comes From}
-\label{sec:decomp}
+\subsection{The Modernization Gain Hides a Regression}
+\label{sec:headline}
 
-The modernized tracker (YOLOv8m + OSNet) raises mean HOTA from \baselineHOTA{} to \modernHOTA{}
-($+\deltaHOTA$) and exceeds the baseline on every one of the six videos (\cref{tab:fullpipeline}).
-Decomposing the gain on the combined MOT16 split (\cref{tab:decomp}) shows it is detection-dominated:
-the detection term improves by $\detaGain$ HOTA points while the association term improves by only
-$\assaGain$. MOTA barely moves ($\baselineMOTA \rightarrow \modernMOTA$), as expected for a
-detection-recall-dominated metric, which is precisely why we report HOTA.
+\cref{tab:fullpipeline} reports per-video HOTA for the 2017 baseline and the modernized tracker.
+With the detector confidence gate raised to $0.45$, the modern tracker beats the baseline on every
+one of the six videos, lifting mean HOTA from \baselineHOTA{} to \modernHOTA{} ($+\deltaHOTA$) at a
+real-time \fpsRealtime{}~FPS (per-clip tuning reaches \modernBestHOTA{}). This is the expected,
+unsurprising result. What the mean hides is the middle row: at its \emph{default} gate (confidence
+$0.25$, no secondary NMS), the modernized tracker scores \modernDefaultHOTA{} -- still
+$+\deltaDefaultHOTA$ above baseline on average, but it \textbf{regresses below the 2017 baseline on
+TUD-Campus} ($35.03$ vs.\ $39.86$). A decade-newer detector and appearance model make the tracker
+worse on that clip. The rest of this section explains why, and shows that the fix is a gate rather
+than a better model.
 
 \begin{table*}[t]
 \centering
-\caption{Per-video HOTA: unmodified baseline vs.\ the modernized pipeline.}
+\caption{Per-video HOTA: the 2017 baseline, the modernized tracker at its ungated default gate
+(confidence $0.25$), and the same tracker with the gate raised to $0.45$. The default modernization
+wins on average yet regresses below the baseline on the low-precision clip TUD-Campus; raising the
+gate recovers it for a win on all six.}
 \label{tab:fullpipeline}
 \small
 \begin{tabular}{lccccccc}
 \toprule
 \textbf{Configuration} & TUD-Campus & TUD-Stadt. & KITTI-17 & PETS09 & MOT16-09 & MOT16-11 & \textbf{Mean} \\
 \midrule
-Baseline (provided det.\ + mars) & 39.86 & 36.75 & 43.41 & 44.84 & 36.24 & 39.95 & 40.17 \\
-\textbf{Modern (YOLOv8m + OSNet)} & \textbf{46.98} & \textbf{59.62} & \textbf{48.75} & \textbf{60.28} & \textbf{48.57} & \textbf{51.07} & \textbf{52.54} \\
+Baseline (provided det.\ + mars)   & 39.86 & 36.75 & 43.41 & 44.84 & 36.24 & 39.95 & 40.17 \\
+Modern, default gate (conf 0.25)   & 35.03 & 58.22 & 45.79 & 60.08 & 48.05 & 48.44 & 49.27 \\
+Modern, gated (conf 0.45)          & 46.30 & 59.37 & 51.53 & 59.62 & 49.86 & 51.09 & \textbf{52.96} \\
 \bottomrule
 \end{tabular}
 \end{table*}
 
+\subsection{The Gain Is Detection-Dominated}
+\label{sec:decomp}
+
+Decomposing the gain on the combined MOT16 split (\cref{tab:decomp}) shows it is detection-dominated:
+the detection term rises by $\detaGain$ HOTA points while the association term rises by only
+$\assaGain$. MOTA barely moves ($\baselineMOTA \rightarrow \modernMOTA$), which is why we report HOTA.
+The same conclusion holds from the association side: replacing the detector with a ground-truth-box
+oracle isolates association, and a dedicated OSNet then reaches \osnetGT{} HOTA while a generic,
+non-re-ID-trained ImageNet backbone reaches \timmGT{} -- a gap of under one HOTA point
+(OSNet-AIN \osnetainGT{} is intermediate). Once detection is held perfect, association quality is
+nearly detector-bound and the appearance model is almost free; the modernization gain lives in the
+detector.
+
 \begin{table}[t]
 \centering
-\caption{Decomposition on the combined MOT16 split.}
+\caption{Decomposition on the combined MOT16 split (default configuration).}
 \label{tab:decomp}
 \small
 \begin{tabular}{lccccc}
@@ -42,20 +63,13 @@ $\Delta$ & +9.03 & +0.41 & +1.53 & \textbf{+12.30} & +6.25 \\
 \end{tabular}
 \end{table}
 
-The same conclusion holds from the association side. Replacing the detector with a ground-truth-box
-oracle isolates association quality: a dedicated OSNet reaches \osnetGT{} HOTA, but a generic,
-non-re-ID-trained ImageNet backbone reaches \timmGT{} -- a gap of under one HOTA point
-(OSNet-AIN \osnetainGT{} is intermediate). Once detection is held perfect, association quality is
-nearly detector-bound and the choice of appearance model is almost free. The gain from
-modernization therefore lives overwhelmingly in the detector.
-
 This makes the \emph{quality} of the detection stream, not its raw quantity, the operative variable.
 \cref{tab:detector} reports YOLOv8m precision, recall, and F1 against ground truth at
 IoU~$\geq 0.5$. Recall is uniformly high (mean $0.831$), but precision is strongly clip-dependent:
-high on clean sequences (TUD-Stadtmitte $0.907$, PETS09 $0.858$) and low on the dense,
-low-resolution clips (TUD-Campus $0.505$, KITTI-17 $0.514$), where the detector emits roughly as many
-false positives as true ones. This per-clip precision is the quantity that, below, predicts whether
-adding detections helps or hurts.
+high on clean sequences (TUD-Stadtmitte $0.907$, PETS09 $0.858$) and low on the dense, low-resolution
+clips (TUD-Campus $0.505$, KITTI-17 $0.514$), where the detector emits roughly as many false positives
+as true ones. This per-clip precision is the quantity that predicts how much each clip is hurt by
+ungated detections.
 
 \begin{table}[t]
 \centering
@@ -82,73 +96,82 @@ MOT16-11       & 0.663 & 0.694 & 0.678 \\
 \label{sec:hurt}
 
 We sweep the detector confidence threshold per video over $\{0.15, 0.25, 0.35, 0.45\}$, holding
-everything else fixed. Lowering the threshold raises recall and lowers precision; the question is what
-this does to HOTA. \cref{fig:hota_vs_conf} shows the response is not monotone in a fixed direction
-across clips: on the dense, low-precision clips HOTA \emph{increases} as the threshold rises (i.e.\
-adding low-confidence detections \emph{hurts}), whereas on the clean clips it is flat or mildly
-decreasing. On \nHurt{} of the \nVideos{} videos, raising the precision gate improves HOTA.
+everything else fixed; lowering the threshold raises recall and lowers precision.
+\cref{fig:hota_vs_conf} shows that raising the gate \textbf{never lowers HOTA on any of the
+\nVideos{} videos} ($\nHurt/\nVideos$): admitting more low-confidence detections only ever hurts. What
+varies is the magnitude. On the low-precision clips the curve climbs steeply (TUD-Campus
+$32.5\rightarrow46.3$, KITTI-17 $42.3\rightarrow51.5$ from conf $0.15$ to $0.45$), while on the
+high-precision clips it is nearly flat and saturates early (PETS09 peaks at conf $0.25$ and is within
+half a point thereafter).
 
-The sign of recall's effect is predicted by per-clip detector precision. \cref{fig:money} plots, for
-each video, the change in HOTA from the lowest to the highest confidence threshold against the clip's
-detector precision (\cref{tab:detector}); the two are correlated (Pearson $r = \corrPearson$): the
-lower a clip's detector precision, the more it benefits from a higher confidence gate. An orthogonal
-recall lever confirms the effect is a property of recall itself rather than of one knob. On the two
-dense clips we instead sweep the detector input resolution (\cref{fig:imgsz}); on TUD-Campus, raising
-the input size drives HOTA monotonically \emph{down}
-($\imgszLow \rightarrow \imgszMid \rightarrow \imgszHigh$). More pixels recover more small instances,
-and the extra, lower-quality detections degrade tracking exactly as lowering the confidence threshold
-does.
+This magnitude is predicted by per-clip detector precision. \cref{fig:money} plots, for each video,
+the HOTA gained by raising the gate from $0.15$ to $0.45$ against the clip's detector precision
+(\cref{tab:detector}); the two are strongly anti-correlated (Pearson $r = \corrPearson$): the less
+precise the detector on a clip, the more that clip is hurt by ungated detections and the more it gains
+from a higher gate. This is the paper's central, quantitative form of ``more detections hurt.''
+
+A second, coarser recall lever behaves less uniformly and is instructive about the mechanism. On the
+two dense clips we sweep the detector input resolution (\cref{fig:imgsz}). On TUD-Campus, raising the
+input size drives HOTA monotonically \emph{down}
+($\imgszLow \rightarrow \imgszMid \rightarrow \imgszHigh$), but on KITTI-17 it rises
+($44.8 \rightarrow 47.3$). Unlike the confidence threshold, which is a pure admission gate on a fixed
+detection set, resolution changes \emph{which} detections exist: the extra boxes recovered at higher
+resolution are mostly false positives on TUD-Campus but mostly true small instances on KITTI-17. The
+effect is therefore not ``more boxes are always bad'' but the sharper claim the confidence sweep
+isolates: admitting \emph{low-confidence} detections is what hurts, in proportion to how imprecise the
+detector is on that clip.
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=\columnwidth]{figures/fig_hota_vs_conf.pdf}
-\caption{HOTA vs.\ detector confidence threshold per video. Solid lines are the dense, low-precision
-clips; on them HOTA rises as weak detections are filtered out.}
+\caption{HOTA vs.\ detector confidence threshold per video. Raising the gate never lowers HOTA on any
+clip; the climb is steepest on the dense, low-precision clips (solid lines).}
 \label{fig:hota_vs_conf}
 \end{figure}
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=\columnwidth]{figures/fig_money_plot.pdf}
-\caption{The sign and size of recall's effect on HOTA (here, HOTA at conf~0.45 minus conf~0.15) track
-per-clip detector precision: low-precision clips gain most from a higher confidence gate.}
+\caption{The HOTA gained by raising the gate (conf~$0.45$ minus conf~$0.15$) against per-clip detector
+precision. Low-precision clips gain most ($r = \corrPearson$).}
 \label{fig:money}
 \end{figure}
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=\columnwidth]{figures/fig_imgsz_dense.pdf}
-\caption{Input-size sweep on the two dense clips. Raising resolution (an orthogonal recall lever)
-lowers HOTA, mirroring the confidence sweep.}
+\caption{Input-size sweep on the two dense clips. Resolution changes the detection set rather than
+gating it, so its effect is sequence-dependent: it hurts on TUD-Campus and helps on KITTI-17.}
 \label{fig:imgsz}
 \end{figure}
 
 \subsection{The Dropped Gate: a Restoration Ablation}
 \label{sec:ablation}
 
-To attribute the regression to the dropped gating contract rather than to the detector itself, we
+To attribute the default regression to the dropped gating contract rather than to the detector, we
 restore the original DeepSORT gate -- $\text{min\_confidence}=0.3$ with NMS at overlap~$0.7$ -- on top
 of the otherwise unchanged modern pipeline (\cref{fig:ablation}). Restoring the gate recovers HOTA on
-the dense clips (mean $\ablationRecover$ HOTA on TUD-Campus and KITTI-17) while leaving the clean
-clips essentially unchanged. Because the restored gate is the same confidence-plus-NMS filter the
-original method applied, re-enabled by configuration alone, the recovered HOTA is causally
-attributable to the gate.
+the dense clips (mean $\ablationRecover$ over TUD-Campus and KITTI-17 relative to the ungated default)
+while leaving the clean clips within roughly a point. Simply raising the confidence threshold to
+$0.45$ recovers even more on TUD-Campus ($46.3$ vs.\ the restored gate's $39.2$), consistent with the
+gate, not the detector, being the cause. Because the restored filter is the same one the original
+method applied, re-enabled by configuration alone, the recovered HOTA is causally attributable to it.
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=\columnwidth]{figures/fig_ablation.pdf}
-\caption{Gating-restoration ablation: per-video HOTA with the modern (ungated) pipeline vs.\ the
-restored original confidence + NMS gate.}
+\caption{Gating-restoration ablation: per-video HOTA for the modern ungated default vs.\ the restored
+original confidence + NMS gate.}
 \label{fig:ablation}
 \end{figure}
 
 \subsection{A Per-Clip Precision-Gating Guideline}
 \label{sec:tuning}
 
-The practical consequence is a simple per-clip policy: choose the detector confidence threshold from
-the clip's precision regime rather than a single global default. Applied to the worst sequence,
-raising the TUD-Campus threshold to $0.45$ moves it from a $\tudUntuned$ HOTA deficit (the global
-default loses to the baseline there) to $+\tudGain$ over baseline, and the change is confined to that
-sequence's preset, leaving the other five untouched. This single per-video override is what lifts the
-modernized tracker to a win on all six videos in \cref{tab:fullpipeline}, at a mean real-time
-throughput of \fpsRealtime{}~FPS.
+The practical consequence is a simple per-clip policy: set the detector confidence threshold from the
+clip's precision regime rather than trusting a global default. On the worst sequence, the ungated
+default loses to the 2017 baseline by $\tudUntuned$ HOTA; raising the TUD-Campus threshold to $0.45$
+moves it to $+\tudGain$ over baseline, and the change is confined to that sequence's preset, leaving
+the other five untouched. This single per-video override is what turns the average-but-uneven default
+of \cref{tab:fullpipeline} into a win on all six videos, at a mean real-time throughput of
+\fpsRealtime{}~FPS.

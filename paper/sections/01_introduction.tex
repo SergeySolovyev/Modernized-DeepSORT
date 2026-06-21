@@ -33,10 +33,10 @@ We make four contributions.
 $\assaGain$ for association, and under ground-truth boxes a non-re-ID-trained ImageNet backbone reaches
 \timmGT{} HOTA versus \osnetGT{} for a dedicated re-ID model, so association is nearly detector-bound once
 boxes are fixed.
-\item A counterintuitive \textbf{``more detections hurt''} regime on dense low-resolution clips: raising the
-TUD-Campus input resolution lowers HOTA monotonically
-($\imgszLow\!\rightarrow\!\imgszMid\!\rightarrow\!\imgszHigh$), and the sign of recall's effect is predicted
-by per-clip detector precision across all \nVideos{} videos.
+\item A counterintuitive \textbf{``more detections hurt''} regime that the headline mean conceals: at its
+default gate the modern tracker scores \emph{below} the 2017 baseline on the least-precise clip, and across
+all \nVideos{} videos lowering the detector confidence gate never raises and usually lowers HOTA, with the
+size of the penalty predicted by per-clip detector precision (Pearson $r = \corrPearson$).
 \item A gating-restoration ablation that attributes the regression to the dropped confidence and NMS gate
 and recovers the loss.
 \item A practical \textbf{per-clip precision-gating guideline}: tuning the confidence threshold per clip

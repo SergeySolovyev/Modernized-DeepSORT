@@ -66,14 +66,15 @@ the full pipeline against this ceiling reveals how detector-bound association qu
 For each of the six videos we sweep the YOLO confidence threshold over
 $\{0.15, 0.25, 0.35, 0.45\}$, holding the detector, REID model, input size, and SORT core fixed. This
 is the precision/recall lever: lowering the threshold raises recall and lowers precision. We pair the
-HOTA response with the detector's per-clip precision at conf~0.25 to test whether the \emph{sign} of
-recall's effect on HOTA is predicted by per-clip precision.
+HOTA response with the detector's per-clip precision at conf~0.25 to test whether the \emph{magnitude}
+of recall's effect on HOTA is predicted by per-clip precision.
 
 \paragraph{(c) Input-size sweep on the two dense clips.}
 On the two dense, low-resolution clips (TUD-Campus and KITTI-17), where YOLO precision is low, we
 additionally sweep the detector input resolution over $\{960, 1280, 1536\}$. Larger input recovers
-more small instances -- an \emph{orthogonal} recall lever to the confidence threshold -- and lets us
-check that the "more detections hurt'' effect is a property of recall itself, not of any one knob.
+more small instances -- a second, \emph{orthogonal} recall lever to the confidence threshold -- and
+lets us test whether it reproduces the confidence-sweep effect or, by changing \emph{which} detections
+exist rather than merely gating them, behaves differently.
 
 \paragraph{(d) Gating-restoration ablation.}
 To attribute the regression specifically to the dropped gate, we restore the original DeepSORT

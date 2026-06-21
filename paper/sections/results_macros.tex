@@ -1,30 +1,35 @@
-% Numeric results. Verified values are set; the six-video gating-sweep summary
-% macros are filled from paper/experiments/gating_study.csv by analyze.py.
+% Numeric results. The six-video headline and the gating sweep come from one controlled
+% run (paper/experiments/gating_study.csv, imgsz 1280); analyze.py fills the sweep summary.
 
-% --- headline / decomposition (verified) ---
-\newcommand{\baselineHOTA}{40.17}
-\newcommand{\modernHOTA}{52.54}
-\newcommand{\deltaHOTA}{12.37}
+% --- headline: six-video mean HOTA (controlled study) ---
+\newcommand{\baselineHOTA}{40.17}        % original DeepSORT (provided detections + mars)
+\newcommand{\modernDefaultHOTA}{49.27}   % modern, ungated default gate (conf 0.25)
+\newcommand{\modernHOTA}{52.96}          % modern, gated (conf 0.45) -- beats baseline on all six
+\newcommand{\modernBestHOTA}{53.27}      % modern, per-clip best gate
+\newcommand{\deltaHOTA}{12.79}           % gated minus baseline
+\newcommand{\deltaDefaultHOTA}{9.10}     % default minus baseline
+\newcommand{\fpsRealtime}{9.87}
+
+% --- detection-vs-association decomposition (MOT16 split, default configuration) ---
 \newcommand{\detaGain}{+12.30}
 \newcommand{\assaGain}{+6.25}
 \newcommand{\baselineMOTA}{46.34}
 \newcommand{\modernMOTA}{46.75}
 
-% --- REID-only (GT boxes) ---
+% --- REID-only under ground-truth boxes (association isolated) ---
 \newcommand{\osnetGT}{89.93}
 \newcommand{\timmGT}{89.22}
 \newcommand{\osnetainGT}{87.33}
 
-% --- TUD-Campus single-clip sweep (verified) ---
-\newcommand{\imgszLow}{39.65}      % imgsz 960
-\newcommand{\imgszMid}{35.0}       % imgsz 1280
-\newcommand{\imgszHigh}{29.7}      % imgsz 1536
-\newcommand{\tudUntuned}{-0.21}    % untuned modern vs baseline on TUD-Campus
-\newcommand{\tudGain}{7.1}         % conf 0.45 tuned vs baseline (46.98 vs 39.86)
-\newcommand{\fpsRealtime}{9.87}
+% --- TUD-Campus levers (controlled study) ---
+\newcommand{\imgszLow}{39.65}      % imgsz 960  (conf 0.25)
+\newcommand{\imgszMid}{35.03}      % imgsz 1280 (conf 0.25, the default)
+\newcommand{\imgszHigh}{29.75}     % imgsz 1536 (conf 0.25)
+\newcommand{\tudUntuned}{4.83}     % magnitude: default gate (conf 0.25) below baseline on TUD-Campus
+\newcommand{\tudGain}{6.44}        % magnitude: gated (conf 0.45) above baseline on TUD-Campus
 
-% --- six-video gating sweep (filled by analyze.py from gating_study.csv) ---
+% --- six-video confidence sweep summary (filled by analyze.py) ---
 \newcommand{\nVideos}{6}
-\newcommand{\nHurt}{TBD}           % videos where raising recall lowers HOTA
-\newcommand{\corrPearson}{TBD}     % corr( d(HOTA)/d(conf) , per-clip precision )
-\newcommand{\ablationRecover}{TBD} % mean HOTA recovered by restoring the gate (dense clips)
+\newcommand{\nHurt}{6}             % videos where raising the gate never lowers HOTA
+\newcommand{\corrPearson}{-0.90}   % corr( per-clip precision , HOTA gained by raising the gate )
+\newcommand{\ablationRecover}{+2.57}

@@ -6,10 +6,11 @@ contemporary detector and re-identification model lifts mean HOTA from \baseline
 \modernHOTA{} ($+\deltaHOTA$) at real-time speed (\fpsRealtime{} FPS), a result that is by itself
 unsurprising. The value lies in decomposing that gain and tracing its failure modes. The
 improvement is detection-dominated rather than association-dominated, and on dense, low-resolution
-clips the modernized pipeline can regress because it silently drops the original confidence and
-non-maximum-suppression gate, letting ungated false positives instantiate spurious tracks. A
-gating-restoration ablation recovers the loss, and the sign of recall's effect on HOTA is
-predicted by per-clip detector precision.
+clips the modernized pipeline can regress -- at its default gate it scores below the 2017 baseline on
+the least-precise clip -- because it silently drops the original confidence and non-maximum-suppression
+gate, letting ungated false positives instantiate spurious tracks. A gating-restoration ablation
+recovers the loss, and the magnitude of recall's effect on HOTA is predicted by per-clip detector
+precision.
 
 The central takeaway is that in tracking-by-detection, \textbf{per-clip precision gating is a
 larger and more reliable lever on HOTA than global recall maximization}. The practical guidance
