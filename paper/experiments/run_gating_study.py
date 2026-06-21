@@ -1,4 +1,4 @@
-"""Gating study for the paper "When More Detections Hurt".
+"""Gating study for the paper "Precision at the Gate".
 
 For every evaluation video, sweep the detector confidence threshold (the recall/precision lever)
 and run a gating-restoration ablation (restore the original DeepSORT min_confidence + NMS gate that

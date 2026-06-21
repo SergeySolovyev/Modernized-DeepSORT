@@ -1,7 +1,7 @@
-# Paper: "When More Detections Hurt"
+# Paper: "Precision at the Gate"
 
-Working title: When More Detections Hurt - A Controlled Audit of Detector-Confidence and Gating
-Effects in a Modernized DeepSORT Pipeline.
+Title: Precision at the Gate - Per-Clip Detector Confidence Outranks Recall in
+Tracking-by-Detection.
 
 This directory is the research-paper track, separate from the course deliverable (the modernized
 tracker and its report at the repository root).
@@ -9,11 +9,11 @@ tracker and its report at the repository root).
 ## Thesis
 
 In appearance-based tracking-by-detection, per-clip detector-confidence (precision) gating is a
-larger and more reliable lever on HOTA than global recall maximization. On dense, low-resolution
-clips, increasing detector recall (lowering the confidence threshold or raising the input size)
-lowers HOTA: the modernized live pipeline drops the original DeepSORT min_confidence + NMS gate, so
-ungated false positives spawn spurious tracks (a DetA-precision and AssA collapse). Restoring the
-gate recovers the loss. The headline gain of the modernization decomposes as detection-dominated
+larger and more reliable lever on HOTA than global recall maximization. Lowering the detector
+confidence gate (admitting more low-confidence detections) lowers HOTA on all six videos, by an
+amount strongly anti-correlated with per-clip detector precision (r = -0.90); the input-size lever is
+sequence-dependent. The modernized live pipeline drops the original DeepSORT min_confidence + NMS
+gate, so ungated false positives spawn spurious tracks. Restoring the gate recovers the loss. The headline gain of the modernization decomposes as detection-dominated
 (DetA much more than AssA), and, under perfect (ground-truth) detection, association quality is
 nearly detector-bound: a generic ImageNet backbone nearly matches a dedicated REID model.
 
