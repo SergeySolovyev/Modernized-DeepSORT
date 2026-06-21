@@ -11,7 +11,15 @@ low-resolution clips and the ``more detections hurt'' regime is consistent
 across the sequences we audit (\cref{tab:detector,fig:money}), but six clips
 cannot establish a calibrated precision threshold that transfers to arbitrary
 domains. The practical guideline of \cref{sec:tuning} should be read as a
-tuning heuristic, not a tuned constant.
+tuning heuristic, not a tuned constant. This caveat extends to the headline
+number. The gated threshold (conf $0.45$) of \cref{tab:fullpipeline} was chosen
+by observing the confidence sweep on the same six sequences on which it is then
+evaluated, with no held-out split, so the gated mean (\modernHOTA{},
+$+\deltaHOTA$) and the per-clip best (\modernBestHOTA{}) are in-sample estimates
+and likely optimistic; $0.45$ is not even uniformly optimal (PETS09 peaks at conf
+$0.25$). The 2017 baseline receives no equivalent per-clip tuning, so the
+baseline-versus-gated comparison is one of unequal tuning; the selection-free
+figure is the uniform-default modernization ($+\deltaDefaultHOTA$ at conf $0.25$).
 
 A reviewer may object that restoring the original DeepSORT confidence and NMS
 gate is ``self-inflicted'': we re-broke a filter the method already had, then
@@ -33,9 +41,10 @@ and ground-truth column-format issues noted in \cref{sec:method}), so the
 detection-side claims rest on a single live detector and cannot speak to
 cross-detector generality. Likewise the live pipeline uses one
 re-identification family; the OSNet-versus-timm comparison
-\cite{zhou2019osnet,wightman2019timm} isolates association only under
-ground-truth boxes, so appearance robustness under real detections, and across
-other re-identification architectures, remains untested. Confirming the
+\cite{zhou2019osnet,wightman2019timm} isolates association under
+ground-truth boxes, where the gap is under one HOTA point; under real detections
+that gap widens to \reidRealGap{} HOTA (\cref{sec:decomp}), and robustness across
+other re-identification architectures remains untested. Confirming the
 precision-gating guideline against modern DeepSORT descendants
 \cite{du2023strongsort,cao2023ocsort,aharon2022botsort} on full benchmark
 splits is left to future work.

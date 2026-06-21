@@ -21,6 +21,11 @@
 \newcommand{\timmGT}{89.22}
 \newcommand{\osnetainGT}{87.33}
 
+% --- OSNet vs timm in the full live pipeline (real detections, course journal) ---
+\newcommand{\osnetReal}{52.54}
+\newcommand{\timmReal}{47.70}
+\newcommand{\reidRealGap}{4.84}
+
 % --- TUD-Campus levers (controlled study) ---
 \newcommand{\imgszLow}{39.65}      % imgsz 960  (conf 0.25)
 \newcommand{\imgszMid}{35.03}      % imgsz 1280 (conf 0.25, the default)
@@ -30,6 +35,6 @@
 
 % --- six-video confidence sweep summary (filled by analyze.py) ---
 \newcommand{\nVideos}{6}
-\newcommand{\nHurt}{6}             % videos where raising the gate never lowers HOTA
+\newcommand{\nHurt}{6}             % videos where conf 0.45 net-beats conf 0.15 (endpoint test in analyze.py)
 \newcommand{\corrPearson}{-0.90}   % corr( per-clip precision , HOTA gained by raising the gate )
 \newcommand{\ablationRecover}{+2.57}

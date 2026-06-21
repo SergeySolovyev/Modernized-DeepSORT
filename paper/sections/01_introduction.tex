@@ -11,20 +11,22 @@ unchanged SORT core. We do exactly this, integrating pluggable detectors (YOLOv8
 and re-ID models (OSNet \cite{zhou2019osnet}; a generic ImageNet timm backbone \cite{wightman2019timm})
 through a single \texttt{Detection(tlwh, confidence, feature)} contract. On six MOT-Challenge training videos
 \cite{leal2015mot15,milan2016mot16}, mean HOTA \cite{luiten2021hota,luiten2020trackeval} rises from
-\baselineHOTA{} to \modernHOTA{} ($+\deltaHOTA$) at \fpsRealtime{} FPS. This headline result is also
+\baselineHOTA{} to \modernHOTA{} ($+\deltaHOTA$); the live pipeline runs at \fpsRealtime{}~FPS
+end-to-end (timed on MOT16-09). This headline result is also
 unsurprising and, on its own, unpublishable: a stronger detector and a stronger encoder make a better
 tracker.
 
 The interesting questions are the ones the headline number hides. \emph{Where} does the gain actually come
 from -- the better detector, or the better appearance model? And does a stronger detector always help: can
 \emph{more} detections, obtained by raising recall, ever \emph{hurt} tracking quality? We find that the
-answers are not the intuitive ones. The modernization gain is overwhelmingly detection-driven, and on dense,
-low-resolution clips pushing the detector toward higher recall drives HOTA monotonically \emph{down}. The
+answers are not the intuitive ones. The modernization gain is overwhelmingly detection-driven, and on the dense,
+low-resolution clips lowering the detector confidence gate drives HOTA monotonically \emph{down} (the
+coarser input-size recall lever is sequence-dependent). The
 mechanism is concrete and reproducible: the modern live pipeline silently drops the original DeepSORT gating
 contract (a $0.3$ confidence threshold plus non-maximum suppression) that once filtered the precomputed
 detections, so ungated false positives instantiate spurious tracks. This leads to our thesis:
-\textbf{in tracking-by-detection, per-clip detector-confidence (precision) gating is a larger and more
-reliable lever on HOTA than global recall maximization}.
+\textbf{across the six clips we audit, per-clip detector-confidence (precision) gating is a larger and
+more consistent HOTA lever than raising recall}.
 
 We make four contributions.
 \begin{enumerate}
@@ -32,13 +34,15 @@ We make four contributions.
 \textbf{detection-dominated}: on MOT16 the detection term improves by $\detaGain$ HOTA against only
 $\assaGain$ for association, and under ground-truth boxes a non-re-ID-trained ImageNet backbone reaches
 \timmGT{} HOTA versus \osnetGT{} for a dedicated re-ID model, so association is nearly detector-bound once
-boxes are fixed.
-\item A counterintuitive \textbf{``more detections hurt''} regime that the headline mean conceals: at its
-default gate the modern tracker scores \emph{below} the 2017 baseline on the least-precise clip, and across
-all \nVideos{} videos lowering the detector confidence gate never raises and usually lowers HOTA, with the
-size of the penalty predicted by per-clip detector precision (Pearson $r = \corrPearson$).
+boxes are fixed (under real detections the same encoders differ by \reidRealGap{} HOTA, so this
+near-parity is specific to perfect boxes).
+\item A counterintuitive \textbf{precision-dependent gating regime} (the ``more detections hurt'' effect)
+that the headline mean conceals: at its default gate the modern tracker scores \emph{below} the 2017
+baseline on the least-precise clip, and across all \nVideos{} videos the lowest confidence gate never beats
+the highest, while on the low-precision clips lowering it sharply lowers HOTA, with the size of the penalty
+predicted by per-clip detector precision (Pearson $r = \corrPearson$, $n=6$).
 \item A gating-restoration ablation that attributes the regression to the dropped confidence and NMS gate
-and recovers the loss.
+and partially recovers the loss (mean $\ablationRecover$ HOTA on the two dense clips).
 \item A practical \textbf{per-clip precision-gating guideline}: tuning the confidence threshold per clip
 lifts the worst sequence from a $\tudUntuned$ deficit to $+\tudGain$ HOTA over baseline.
 \end{enumerate}
