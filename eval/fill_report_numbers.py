@@ -1,7 +1,7 @@
 """Fill the two remaining (pending) report tables: detector P/R/F1 (S2.2) and segmentation (S5).
 
 Runs det_eval for each detector and yolo_seg live tracking, scores HOTA, then prints clean mean
-summaries to paste into report.md. Detectors whose backend isn't installed on the runtime are
+summaries to paste into the report. Detectors whose backend isn't installed on the runtime are
 reported as NOT AVAILABLE (honest negative result) rather than crashing the run.
 
   python -m eval.fill_report_numbers            # cuda

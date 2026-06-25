@@ -62,7 +62,7 @@ or per-sequence presets in `configs/sequences/<seq>.yaml`.
 The notebook [notebooks/DeepSORT_Modern.ipynb](notebooks/DeepSORT_Modern.ipynb) is a thin
 orchestrator that runs install -> download -> baseline -> detector/REID studies -> best-combo
 tracking -> body-REID -> overlays end-to-end in Colab. Numbers land in `results/experiments.csv`;
-the writeup is in [report/report.md](report/report.md).
+the writeup is in [report/report.pdf](report/report.pdf) (LaTeX source in [report/latex/main.tex](report/latex/main.tex)).
 
 ## Tests
 

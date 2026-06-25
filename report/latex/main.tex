@@ -334,8 +334,10 @@ segmentation detector were added as optional modules and evaluated separately.
 \section{Description of the Project Results}
 \label{sec:results}
 
-All numbers in this section are from the live Colab run of 2026-06-19 and are recorded in
-\texttt{results/experiments.csv} and \texttt{report/results\_table.md}.
+All numbers in this section are from the live Colab runs recorded in
+\texttt{results/experiments.csv} and \texttt{report/results\_table.md}. The headline tracking,
+re-identification and body-\reid{} results are from the run of 2026-06-19; the detector and
+segmentation studies were refreshed on 2026-06-25 with the then-current YOLOv8m weights.
 
 \subsection{Baseline}
 Table~\ref{tab:baseline} reports the per-video \hota{} of the unmodified DeepSORT. Its mean of
@@ -358,9 +360,9 @@ HOTA & 39.86 & 36.75 & 43.41 & 44.84 & 36.24 & 39.95 & \textbf{40.17} \\
 
 \subsection{Detector Evaluation}
 Figure~\ref{fig:detprf} and Table~\ref{tab:detector} report detector precision, recall and F1.
-YOLOv8m has high mean recall ($0.831$) but its precision varies by sequence: it is high on the
-cleaner videos and low on the dense low-resolution clips (precision $0.51$ on both TUD-Campus and
-KITTI-17), where it produces many false-positive boxes. NanoDet and RTMDet were not installed on the
+YOLOv8m has high mean recall ($0.828$) but its precision varies by sequence: it is high on the
+cleaner videos and lowest on the dense low-resolution KITTI-17 clip (precision $0.51$), where it
+produces many false-positive boxes. NanoDet and RTMDet were not installed on the
 runtime (Section~\ref{sec:difficulties}).
 
 \begin{table}[H]
@@ -371,8 +373,8 @@ runtime (Section~\ref{sec:difficulties}).
 \toprule
 \textbf{Detector} & \textbf{Precision} & \textbf{Recall} & \textbf{F1} \\
 \midrule
-YOLOv8m (box)            & 0.683 & 0.831 & 0.740 \\
-YOLOv8m-seg (mask-to-box) & 0.696 & 0.831 & 0.749 \\
+YOLOv8m (box)            & 0.721 & 0.828 & 0.765 \\
+YOLOv8m-seg (mask-to-box) & 0.727 & 0.827 & 0.768 \\
 NanoDet                  & \multicolumn{3}{c}{not installed on this runtime} \\
 RTMDet (MMDetection)     & \multicolumn{3}{c}{not installed on this runtime} \\
 \bottomrule
@@ -506,11 +508,13 @@ Difference                     & $+9.03$ & $+0.41$ & $+1.53$ & $+12.30$ & $+6.25
 
 \subsection{Segmentation}
 The YOLOv8 segmentation detector produces a person mask and converts it to a tight bounding box. It
-is marginally better than the box detector on detection F1 ($0.749$ vs $0.740$) and on mean
-\hota{} ($51.86$ vs $51.45$), but the mask head roughly halves the throughput
-($8.91$ vs $14.68$~FPS); both remain above the real-time threshold. The result is a quality and speed
-trade-off rather than a clear improvement, so the box detector is the default and segmentation is a
-switchable option (Figure~\ref{fig:seg}).
+is marginally better than the box detector on detection F1 ($0.768$ vs $0.765$) and on mean
+\hota{} ($52.76$ vs $52.55$), but the mask head is substantially slower: on MOT16-09 the segmentation
+pipeline runs at $3.92$~FPS, below the $5$~FPS real-time threshold, against $9.87$~FPS for the box
+pipeline. Segmentation stays real-time on the lighter 2D~MOT~2015 clips ($\sim$10--14~FPS) but not on
+the heavier MOT16 sequences. The marginal accuracy gain therefore does not justify the loss of
+real-time throughput, so the box detector is the default and segmentation is a switchable option
+(Figure~\ref{fig:seg}).
 
 \begin{figure}[H]
   \centering

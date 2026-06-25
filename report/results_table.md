@@ -5,6 +5,9 @@ All six MOT-Challenge train sequences. HOTA via TrackEval (numpy-2.x patched). T
 live pipeline (YOLOv8m detector + REID); `gt__*__gtbox` = REID-only study (GT boxes, SORT
 detection disabled - isolates the appearance model).
 
+The tracking, REID-only and body-REID results are from the run of 2026-06-19; the detector P/R/F1
+and segmentation rows were refreshed on 2026-06-25 with the then-current YOLOv8m weights.
+
 ## HOTA per video
 
 | tracker | TUD-Campus | TUD-Stadtmitte | KITTI-17 | PETS09-S2L1 | MOT16-09 | MOT16-11 | **Mean** | Delta vs baseline |
@@ -52,13 +55,14 @@ YOLOv8 + OSNet: overall 9.87 FPS (det 30.9 / reid 30.6 / track 48.7), which meet
 
 ## Segmentation (box detector vs mask detector, same OSNet REID)
 
-| detector | mean F1 | mean HOTA | mean FPS |
+| detector | mean F1 | mean HOTA | FPS (MOT16-09) |
 |---|---|---|---|
-| yolo (box) | 0.740 | 51.45 | 14.68 |
-| yolo_seg (mask->bbox) | 0.749 | 51.86 | 8.91 |
+| yolo (box) | 0.765 | 52.55 | 9.87 |
+| yolo_seg (mask->bbox) | 0.768 | 52.76 | 3.92 |
 
-Mask-derived boxes are marginally tighter (F1 +0.009, HOTA +0.41) but the mask head
-roughly halves throughput; both stay above the 5 FPS real-time bar. The box detector is the
+Mask-derived boxes are marginally tighter (F1 +0.003, HOTA +0.21) but the mask head drops throughput
+below the 5 FPS bar on MOT16-09 (3.92 vs 9.87 FPS). Segmentation stays real-time on the lighter
+2D MOT 2015 clips (~10-14 FPS) but not on the heavier MOT16 sequences. The box detector is the
 default; segmentation is a switchable option (`--detector yolo_seg`).
 
 ## REID-only study (GT boxes -> HOTA isolates appearance)

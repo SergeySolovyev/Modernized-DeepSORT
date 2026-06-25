@@ -1,8 +1,8 @@
 """Generate the report figures (matplotlib) from the verified results.
 
-All values are taken from report/results_table.md and report/report.md (the live
-Colab run, 2026-06-19). Figures are written as PNG to images/outputs/ next to this
-script and are included by main.tex.
+All values are taken from report/results_table.md and results/experiments.csv (the live
+Colab runs of 2026-06-19 and the 2026-06-25 detector/segmentation refresh). Figures are
+written as PNG to images/outputs/ next to this script and are included by main.tex.
 
   python report/latex/make_figures.py
 """
@@ -81,8 +81,8 @@ def fig_reid_only():
 # 3) Detector precision / recall / F1
 def fig_detector_prf():
     metrics = ["Precision", "Recall", "F1"]
-    yolo = [0.683, 0.831, 0.740]
-    yseg = [0.696, 0.831, 0.749]
+    yolo = [0.721, 0.828, 0.765]
+    yseg = [0.727, 0.827, 0.768]
     x = np.arange(len(metrics)); w = 0.34
     fig, ax = plt.subplots(figsize=(8, 4.6))
     b1 = ax.bar(x - w / 2, yolo, w, label="YOLOv8m (box)", color=BLUE, edgecolor=EDGE, linewidth=0.5)
@@ -142,13 +142,13 @@ def fig_metric_decomposition():
 def fig_segmentation():
     fig, (a1, a2) = plt.subplots(1, 2, figsize=(11, 4.4))
     names = ["YOLOv8m\n(box)", "YOLOv8m-seg\n(mask->bbox)"]
-    f1 = [0.740, 0.749]; fps = [14.68, 8.91]
+    f1 = [0.765, 0.768]; fps = [9.87, 3.92]
     b1 = a1.bar(names, f1, color=[BLUE, ORANGE], edgecolor=EDGE, linewidth=0.5, width=0.55)
     a1.set_ylabel("mean detection F1"); a1.set_ylim(0, 0.9); gridy(a1)
     a1.set_title("Detection quality"); vlabels(a1, b1, fmt="%.3f", fs=10)
     b2 = a2.bar(names, fps, color=[BLUE, ORANGE], edgecolor=EDGE, linewidth=0.5, width=0.55)
     a2.axhline(5, color="#C0392B", linewidth=1.2, linestyle="--", label="real-time bar (5 FPS)")
-    a2.set_ylabel("mean FPS"); a2.set_ylim(0, 18); gridy(a2)
+    a2.set_ylabel("FPS (MOT16-09)"); a2.set_ylim(0, 12); gridy(a2)
     a2.set_title("Throughput"); a2.legend(loc="upper right"); vlabels(a2, b2, fmt="%.2f", fs=10)
     fig.suptitle("Box detector vs segmentation detector (same OSNet REID)", fontsize=14)
     save(fig, "fig_segmentation.png")
