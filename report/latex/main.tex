@@ -509,7 +509,7 @@ Difference                     & $+9.03$ & $+0.41$ & $+1.53$ & $+12.30$ & $+6.25
 \subsection{Segmentation}
 The YOLOv8 segmentation detector produces a person mask and converts it to a tight bounding box. It
 is marginally better than the box detector on detection F1 ($0.768$ vs $0.765$) and on mean
-\hota{} ($52.76$ vs $52.55$), but the mask head is substantially slower: on MOT16-09 the segmentation
+\hota{} ($52.76$ vs $52.54$), but the mask head is substantially slower: on MOT16-09 the segmentation
 pipeline runs at $3.92$~FPS, below the $5$~FPS real-time threshold, against $9.87$~FPS for the box
 pipeline. Segmentation stays real-time on the lighter 2D~MOT~2015 clips ($\sim$10--14~FPS) but not on
 the heavier MOT16 sequences. The marginal accuracy gain therefore does not justify the loss of

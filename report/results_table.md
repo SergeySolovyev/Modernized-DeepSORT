@@ -57,11 +57,11 @@ YOLOv8 + OSNet: overall 9.87 FPS (det 30.9 / reid 30.6 / track 48.7), which meet
 
 | detector | mean F1 | mean HOTA | FPS (MOT16-09) |
 |---|---|---|---|
-| yolo (box) | 0.765 | 52.55 | 9.87 |
+| yolo (box) | 0.765 | 52.54 | 9.87 |
 | yolo_seg (mask->bbox) | 0.768 | 52.76 | 3.92 |
 
-Mask-derived boxes are marginally tighter (F1 +0.003, HOTA +0.21) but the mask head drops throughput
-below the 5 FPS bar on MOT16-09 (3.92 vs 9.87 FPS). Segmentation stays real-time on the lighter
+Mask-derived boxes are marginally tighter (F1 0.768 vs 0.765, HOTA 52.76 vs 52.54) but the mask head
+drops throughput below the 5 FPS bar on MOT16-09 (3.92 vs 9.87 FPS). Segmentation stays real-time on the lighter
 2D MOT 2015 clips (~10-14 FPS) but not on the heavier MOT16 sequences. The box detector is the
 default; segmentation is a switchable option (`--detector yolo_seg`).
 
