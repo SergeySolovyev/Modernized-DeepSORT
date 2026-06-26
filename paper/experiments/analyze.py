@@ -26,8 +26,11 @@ SEQS = ["TUD-Campus", "TUD-Stadtmitte", "KITTI-17", "PETS09-S2L1", "MOT16-09", "
 SHORT = {"TUD-Campus": "TUD-Campus", "TUD-Stadtmitte": "TUD-Stadt.", "KITTI-17": "KITTI-17",
          "PETS09-S2L1": "PETS09", "MOT16-09": "MOT16-09", "MOT16-11": "MOT16-11"}
 DENSE = ["TUD-Campus", "KITTI-17"]
-PREC0 = {"TUD-Campus": 0.505, "TUD-Stadtmitte": 0.907, "KITTI-17": 0.514,
-         "PETS09-S2L1": 0.858, "MOT16-09": 0.650, "MOT16-11": 0.663}
+# Per-clip detector precision at conf 0.25, imgsz 1280 (the gating-study config),
+# measured with the pinned weights: ultralytics 8.4.79, yolov8m.pt
+# sha256 5d4a90cdc7a21786cc59cd19778e9eafff836df9e2da32524737c7ee6efe4fe5.
+PREC0 = {"TUD-Campus": 0.432, "TUD-Stadtmitte": 0.892, "KITTI-17": 0.480,
+         "PETS09-S2L1": 0.850, "MOT16-09": 0.623, "MOT16-11": 0.623}
 
 plt.rcParams.update({
     "figure.dpi": 150, "savefig.bbox": "tight", "font.size": 9,
@@ -49,13 +52,11 @@ def load_gating():
 
 
 def load_precision():
-    prec = dict(PREC0)
-    if os.path.exists(JOURNAL):
-        for r in csv.DictReader(open(JOURNAL, encoding="utf-8")):
-            if (r.get("component") == "detector" and r.get("detector") == "yolo"
-                    and r.get("precision") not in (None, "", "None")):
-                prec[r["seq"]] = float(r["precision"])
-    return prec
+    # Use the pinned imgsz-1280 precision (PREC0). We deliberately do NOT read
+    # results/experiments.csv here: that journal records the report track's
+    # default-imgsz detector run, whose precision differs from the gating study's
+    # imgsz-1280 configuration and would mix two settings on the money plot.
+    return dict(PREC0)
 
 
 def save(fig, name):

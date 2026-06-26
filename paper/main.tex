@@ -52,7 +52,7 @@ ground-truth boxes a generic ImageNet backbone (not trained for re-identificatio
 detector-bound once detection is fixed -- a near-parity specific to perfect boxes, since under real
 detections the two encoders differ by \reidRealGap{} HOTA. Second, the mean hides a regression: at its
 default gate the modernized tracker scores below the 2017 baseline on the least-precise clip
-(TUD-Campus, $35.03$ vs.\ $39.86$ HOTA). We trace this to a counterintuitive regime: across
+(TUD-Campus, $35.14$ vs.\ $39.86$ HOTA). We trace this to a counterintuitive regime: across
 \textbf{all six videos the lowest detector confidence gate scores no higher than the highest, and on
 the low-precision clips lowering the gate sharply lowers HOTA}, with the size of the penalty tracking
 per-clip detector precision (Pearson $r = \corrPearson$, $n=6$).

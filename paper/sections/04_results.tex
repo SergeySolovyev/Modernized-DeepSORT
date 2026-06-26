@@ -12,7 +12,7 @@ This is the expected,
 unsurprising result. What the mean hides is the middle row: at its \emph{default} gate (confidence
 $0.25$, no secondary NMS), the modernized tracker scores \modernDefaultHOTA{} -- still
 $+\deltaDefaultHOTA$ above baseline on average, but it \textbf{regresses below the 2017 baseline on
-TUD-Campus} ($35.03$ vs.\ $39.86$). A decade-newer detector and appearance model make the tracker
+TUD-Campus} ($35.14$ vs.\ $39.86$). A decade-newer detector and appearance model make the tracker
 worse on that clip. The rest of this section explains why, and shows that the fix is a gate rather
 than a better model.
 
@@ -29,8 +29,8 @@ gate recovers it for a win on all six.}
 \textbf{Configuration} & TUD-Campus & TUD-Stadt. & KITTI-17 & PETS09 & MOT16-09 & MOT16-11 & \textbf{Mean} \\
 \midrule
 Baseline (provided det.\ + mars)   & 39.86 & 36.75 & 43.41 & 44.84 & 36.24 & 39.95 & 40.17 \\
-Modern, default gate (conf 0.25)   & 35.03 & 58.22 & 45.79 & 60.08 & 48.05 & 48.44 & 49.27 \\
-Modern, gated (conf 0.45)          & 46.30 & 59.37 & 51.53 & 59.62 & 49.86 & 51.09 & \textbf{52.96} \\
+Modern, default gate (conf 0.25)   & 35.14 & 58.21 & 44.05 & 60.08 & 48.06 & 48.46 & 49.00 \\
+Modern, gated (conf 0.45)          & 46.29 & 59.37 & 49.60 & 59.62 & 49.85 & 51.08 & \textbf{52.63} \\
 \bottomrule
 \end{tabular}
 \end{table*}
@@ -70,29 +70,30 @@ $\Delta$ & +9.03 & +0.41 & +1.53 & \textbf{+12.30} & +6.25 \\
 
 This makes the \emph{quality} of the detection stream, not its raw quantity, the operative variable.
 \cref{tab:detector} reports YOLOv8m precision, recall, and F1 against ground truth at
-IoU~$\geq 0.5$. Recall is uniformly high (mean $0.831$), but precision is strongly clip-dependent:
-high on clean sequences (TUD-Stadtmitte $0.907$, PETS09 $0.858$) and low on the dense, low-resolution
-clips (TUD-Campus $0.505$, KITTI-17 $0.514$), where the detector emits roughly as many false positives
-as true ones. This per-clip precision is the quantity that predicts how much each clip is hurt by
+IoU~$\geq 0.5$. Recall is uniformly high (mean $0.835$), but precision is strongly clip-dependent:
+high on clean sequences (TUD-Stadtmitte $0.892$, PETS09 $0.850$) and low on the dense, low-resolution
+clips (TUD-Campus $0.432$, KITTI-17 $0.480$), where the detector emits more false positives
+than true ones. This per-clip precision is the quantity that predicts how much each clip is hurt by
 ungated detections.
 
 \begin{table}[t]
 \centering
-\caption{YOLOv8m detection quality vs.\ ground truth (IoU~$\geq 0.5$, conf~0.25).}
+\caption{YOLOv8m detection quality vs.\ ground truth (IoU~$\geq 0.5$, conf~0.25, imgsz~1280;
+ultralytics~8.4.79).}
 \label{tab:detector}
 \small
 \begin{tabular}{lccc}
 \toprule
 \textbf{Sequence} & Precision & Recall & F1 \\
 \midrule
-TUD-Campus     & 0.505 & 0.869 & 0.639 \\
-TUD-Stadtmitte & 0.907 & 0.863 & 0.884 \\
-KITTI-17       & 0.514 & 0.867 & 0.645 \\
-PETS09-S2L1    & 0.858 & 0.950 & 0.901 \\
-MOT16-09       & 0.650 & 0.743 & 0.693 \\
-MOT16-11       & 0.663 & 0.694 & 0.678 \\
+TUD-Campus     & 0.432 & 0.875 & 0.579 \\
+TUD-Stadtmitte & 0.892 & 0.865 & 0.878 \\
+KITTI-17       & 0.480 & 0.871 & 0.619 \\
+PETS09-S2L1    & 0.850 & 0.951 & 0.897 \\
+MOT16-09       & 0.623 & 0.748 & 0.680 \\
+MOT16-11       & 0.623 & 0.700 & 0.659 \\
 \midrule
-\textbf{Mean}  & \textbf{0.683} & \textbf{0.831} & \textbf{0.740} \\
+\textbf{Mean}  & \textbf{0.650} & \textbf{0.835} & \textbf{0.719} \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -106,22 +107,25 @@ everything else fixed; lowering the threshold raises recall and lowers precision
 ($0.15$) on \textbf{all \nVideos{} videos} ($\nHurt/\nVideos$): admitting more low-confidence detections
 is never a net win, though one high-precision clip (PETS09) peaks at conf $0.25$ and gives back about
 half a point by $0.45$. What varies is the magnitude. On the low-precision clips the curve climbs steeply (TUD-Campus
-$32.5\rightarrow46.3$, KITTI-17 $42.3\rightarrow51.5$ from conf $0.15$ to $0.45$), while on the
+$32.5\rightarrow46.3$, KITTI-17 $40.7\rightarrow49.6$ from conf $0.15$ to $0.45$), while on the
 high-precision clips it is nearly flat and saturates early (PETS09 peaks at conf $0.25$ and is within
 half a point thereafter).
 
 This magnitude is predicted by per-clip detector precision. \cref{fig:money} plots, for each video,
 the HOTA gained by raising the gate from $0.15$ to $0.45$ against the clip's detector precision
 (\cref{tab:detector}); the two are anti-correlated across the six clips (descriptive Pearson
-$r = \corrPearson$, $n=6$): the less
+$r = \corrPearson$, $n=6$; Spearman $\rho = -0.93$; Fisher 95\% CI $[-0.99, -0.38]$,
+two-sided $p \approx 0.01$): the less
 precise the detector on a clip, the more that clip is hurt by ungated detections and the more it gains
-from a higher gate. This is the paper's central, quantitative form of ``more detections hurt.''
+from a higher gate. With $n=6$ this is a hypothesis-generating association rather than a calibrated
+law; the robust, design-level result is the $\nHurt/\nVideos$ monotone endpoint test above, which
+needs no fitted correlation. Together they are the paper's quantitative form of ``more detections hurt.''
 
 A second, coarser recall lever behaves less uniformly and is instructive about the mechanism. On the
 two dense clips we sweep the detector input resolution (\cref{fig:imgsz}). On TUD-Campus, raising the
 input size drives HOTA monotonically \emph{down}
 ($\imgszLow \rightarrow \imgszMid \rightarrow \imgszHigh$), but on KITTI-17 it rises
-($44.8 \rightarrow 47.3$). Unlike the confidence threshold, which is a pure admission gate on a fixed
+($44.9 \rightarrow 47.4$). Unlike the confidence threshold, which is a pure admission gate on a fixed
 detection set, resolution changes \emph{which} detections exist: the extra boxes recovered at higher
 resolution are mostly false positives on TUD-Campus but mostly true small instances on KITTI-17. The
 effect is therefore not ``more boxes are always bad'' but the sharper claim the confidence sweep

@@ -1,13 +1,14 @@
 % Numeric results. The six-video headline and the gating sweep come from one controlled
-% run (paper/experiments/gating_study.csv, imgsz 1280); analyze.py fills the sweep summary.
+% run (paper/experiments/gating_study.csv, imgsz 1280, ultralytics 8.4.79 / yolov8m.pt
+% sha256 5d4a90cd...4fe5); analyze.py fills nHurt / corrPearson / ablationRecover.
 
 % --- headline: six-video mean HOTA (controlled study) ---
 \newcommand{\baselineHOTA}{40.17}        % original DeepSORT (provided detections + mars)
-\newcommand{\modernDefaultHOTA}{49.27}   % modern, ungated default gate (conf 0.25)
-\newcommand{\modernHOTA}{52.96}          % modern, gated (conf 0.45) -- beats baseline on all six
-\newcommand{\modernBestHOTA}{53.27}      % modern, per-clip best gate
-\newcommand{\deltaHOTA}{12.79}           % gated minus baseline
-\newcommand{\deltaDefaultHOTA}{9.10}     % default minus baseline
+\newcommand{\modernDefaultHOTA}{49.00}   % modern, ungated default gate (conf 0.25)
+\newcommand{\modernHOTA}{52.63}          % modern, gated (conf 0.45) -- beats baseline on all six
+\newcommand{\modernBestHOTA}{52.71}      % modern, per-clip best over the confidence grid
+\newcommand{\deltaHOTA}{12.46}           % gated minus baseline
+\newcommand{\deltaDefaultHOTA}{8.83}     % default minus baseline
 \newcommand{\fpsRealtime}{9.87}
 
 % --- detection-vs-association decomposition (MOT16 split, default configuration) ---
@@ -28,13 +29,13 @@
 
 % --- TUD-Campus levers (controlled study) ---
 \newcommand{\imgszLow}{39.65}      % imgsz 960  (conf 0.25)
-\newcommand{\imgszMid}{35.03}      % imgsz 1280 (conf 0.25, the default)
-\newcommand{\imgszHigh}{29.75}     % imgsz 1536 (conf 0.25)
-\newcommand{\tudUntuned}{4.83}     % magnitude: default gate (conf 0.25) below baseline on TUD-Campus
-\newcommand{\tudGain}{6.44}        % magnitude: gated (conf 0.45) above baseline on TUD-Campus
+\newcommand{\imgszMid}{35.14}      % imgsz 1280 (conf 0.25, the default)
+\newcommand{\imgszHigh}{29.74}     % imgsz 1536 (conf 0.25)
+\newcommand{\tudUntuned}{4.72}     % magnitude: default gate (conf 0.25) below baseline on TUD-Campus
+\newcommand{\tudGain}{6.43}        % magnitude: gated (conf 0.45) above baseline on TUD-Campus
 
 % --- six-video confidence sweep summary (filled by analyze.py) ---
 \newcommand{\nVideos}{6}
 \newcommand{\nHurt}{6}             % videos where conf 0.45 net-beats conf 0.15 (endpoint test in analyze.py)
-\newcommand{\corrPearson}{-0.90}   % corr( per-clip precision , HOTA gained by raising the gate )
-\newcommand{\ablationRecover}{+2.57}
+\newcommand{\corrPearson}{-0.91}   % corr( per-clip precision , HOTA gained by raising the gate )
+\newcommand{\ablationRecover}{+3.41}

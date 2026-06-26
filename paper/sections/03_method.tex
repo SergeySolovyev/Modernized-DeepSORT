@@ -88,6 +88,11 @@ on the detection stream feeding the unchanged tracker, any recovered HOTA is cau
 admission, not to a confounding code change.
 
 \paragraph{Reproducibility.}
+The detector is pinned: ultralytics~8.4.79 with the \texttt{yolov8m.pt} checkpoint
+(sha256 \texttt{5d4a90cd\dots4fe5}) at input size~1280. Per-clip detector precision is
+weight-version-sensitive, so we fix and report the version; a different ultralytics release
+shifts the absolute values (e.g.\ TUD-Campus precision $0.50$ rather than $0.43$) but leaves the
+low-precision ordering -- TUD-Campus and KITTI-17 lowest -- on which the analysis depends unchanged.
 Every run -- each detector preset, REID model, confidence level, input size, and ablation -- appends
 one row to a versioned CSV journal recording the configuration and resulting metrics, so the full
 experimental history is traceable and the gating-sweep figures in \cref{sec:results} (confidence,
