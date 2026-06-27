@@ -41,7 +41,7 @@ near-parity is specific to perfect boxes).
 that the headline mean conceals: at its default gate the modern tracker scores \emph{below} the 2017
 baseline on the least-precise clip, and across all \nVideos{} videos the lowest confidence gate never beats
 the highest, while on the low-precision clips lowering it sharply lowers HOTA, with the size of the penalty
-predicted by per-clip detector precision (Pearson $r = \corrPearson$, $n=6$).
+tracking per-clip detector precision (Pearson $r = \corrPearson$, $n=6$).
 \item A gating-restoration ablation that attributes the regression to the dropped confidence and NMS gate
 and partially recovers the loss (mean $\ablationRecover$ HOTA on the two dense clips).
 \item A practical \textbf{per-clip precision-gating guideline}: tuning the confidence threshold per clip

@@ -73,7 +73,7 @@ This makes the \emph{quality} of the detection stream, not its raw quantity, the
 IoU~$\geq 0.5$. Recall is uniformly high (mean $0.835$), but precision is strongly clip-dependent:
 high on clean sequences (TUD-Stadtmitte $0.892$, PETS09 $0.850$) and low on the dense, low-resolution
 clips (TUD-Campus $0.432$, KITTI-17 $0.480$), where the detector emits more false positives
-than true ones. This per-clip precision is the quantity that predicts how much each clip is hurt by
+than true ones. This per-clip precision is the quantity that tracks how much each clip is hurt by
 ungated detections.
 
 \begin{table}[t]
@@ -111,7 +111,7 @@ $32.5\rightarrow46.3$, KITTI-17 $40.7\rightarrow49.6$ from conf $0.15$ to $0.45$
 high-precision clips it is nearly flat and saturates early (PETS09 peaks at conf $0.25$ and is within
 half a point thereafter).
 
-This magnitude is predicted by per-clip detector precision. \cref{fig:money} plots, for each video,
+This magnitude tracks per-clip detector precision. \cref{fig:money} plots, for each video,
 the HOTA gained by raising the gate from $0.15$ to $0.45$ against the clip's detector precision
 (\cref{tab:detector}); the two are anti-correlated across the six clips (descriptive Pearson
 $r = \corrPearson$, $n=6$; Spearman $\rho = -0.93$; Fisher 95\% CI $[-0.99, -0.38]$,

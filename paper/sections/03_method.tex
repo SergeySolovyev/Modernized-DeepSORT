@@ -69,7 +69,7 @@ For each of the six videos we sweep the YOLO confidence threshold over
 $\{0.15, 0.25, 0.35, 0.45\}$, holding the detector, REID model, input size, and SORT core fixed. This
 is the precision/recall lever: lowering the threshold raises recall and lowers precision. We pair the
 HOTA response with the detector's per-clip precision at conf~0.25 to test whether the \emph{magnitude}
-of recall's effect on HOTA is predicted by per-clip precision.
+of recall's effect on HOTA is associated with per-clip precision.
 
 \paragraph{(c) Input-size sweep on the two dense clips.}
 On the two dense, low-resolution clips (TUD-Campus and KITTI-17), where YOLO precision is low, we
@@ -89,17 +89,21 @@ admission, not to a confounding code change.
 
 \paragraph{Reproducibility.}
 The detector is pinned: ultralytics~8.4.79 with the \texttt{yolov8m.pt} checkpoint
-(sha256 \texttt{5d4a90cd\dots4fe5}) at input size~1280. Per-clip detector precision is
-weight-version-sensitive, so we fix and report the version; a different ultralytics release
-shifts the absolute values (e.g.\ TUD-Campus precision $0.50$ rather than $0.43$) but leaves the
-low-precision ordering -- TUD-Campus and KITTI-17 lowest -- on which the analysis depends unchanged.
+(sha256 \texttt{5d4a90cd\dots4fe5}) at input size~1280. Per-clip detector precision depends on both the
+input size and the weights, so we fix and report both: the precision values in \cref{tab:detector} and
+the money plot are measured at input size~1280 with the pinned checkpoint, and are recorded in the
+journal as the \texttt{detector\_imgsz1280} rows. At the report track's smaller default input size the
+same detector is markedly more precise on TUD-Campus ($0.73$ versus $0.43$), itself an instance of the
+resolution effect studied in \cref{sec:hurt}; we therefore state the analysis at a single pinned
+configuration rather than asserting a configuration-independent precision.
 Every run -- each detector preset, REID model, confidence level, input size, and ablation -- appends
 one row to a versioned CSV journal recording the configuration and resulting metrics, so the full
 experimental history is traceable and the gating-sweep figures in \cref{sec:results} (confidence,
-precision, input-size, and ablation plots) are regenerable from it; the ground-truth-box re-identification scores
-(\osnetGT{}/\timmGT{}/\osnetainGT{}) are the six-clip means of the \texttt{gt\_*\_gtbox} HOTA rows
-in that journal, while the detection/association decomposition of \cref{tab:decomp} is a separate
-TrackEval run on the combined MOT16 split under the default configuration. The
+precision, input-size, and ablation plots) are regenerable from it; the per-clip precision behind the
+money plot is the \texttt{detector\_imgsz1280} journal rows, the ground-truth-box re-identification
+scores (\osnetGT{}/\timmGT{}/\osnetainGT{}) are the six-clip means of the \texttt{gt\_*\_gtbox} HOTA
+rows, and the detection/association decomposition of \cref{tab:decomp} is a separate TrackEval run on
+the combined MOT16 split under the default configuration. The
 sweep harness writes each result immediately and skips configurations already present, so an
 interrupted run resumes without recomputation. We also note two environment-level pitfalls that the
 journal helped surface and that we report as negative results in \cref{sec:limitations}: a NumPy-2.x

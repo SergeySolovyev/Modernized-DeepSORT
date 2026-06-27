@@ -30,6 +30,7 @@ DENSE = ["TUD-Campus", "KITTI-17"]
 # Per-clip detector precision at conf 0.25, imgsz 1280 (the gating-study config),
 # measured with the pinned weights: ultralytics 8.4.79, yolov8m.pt
 # sha256 5d4a90cdc7a21786cc59cd19778e9eafff836df9e2da32524737c7ee6efe4fe5.
+# These mirror the detector_imgsz1280 rows in results/experiments.csv (provenance).
 PREC0 = {"TUD-Campus": 0.432, "TUD-Stadtmitte": 0.892, "KITTI-17": 0.480,
          "PETS09-S2L1": 0.850, "MOT16-09": 0.623, "MOT16-11": 0.623}
 

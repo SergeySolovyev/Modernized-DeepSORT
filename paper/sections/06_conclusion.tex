@@ -11,7 +11,7 @@ clips the modernized pipeline can regress -- at its default gate it scores below
 the least-precise clip -- because it silently drops the original confidence and non-maximum-suppression
 gate, letting ungated false positives instantiate spurious tracks. A gating-restoration ablation
 partially recovers the loss (mean $\ablationRecover$ HOTA on the two dense clips), and the magnitude of
-recall's effect on HOTA is predicted by per-clip detector precision.
+recall's effect on HOTA is anti-correlated with per-clip detector precision ($r = \corrPearson$, $n=6$).
 
 The central takeaway is that, on these six clips, \textbf{per-clip precision gating is a
 larger and more consistent HOTA lever than global recall maximization}. The practical guidance
