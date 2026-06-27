@@ -96,8 +96,10 @@ low-precision ordering -- TUD-Campus and KITTI-17 lowest -- on which the analysi
 Every run -- each detector preset, REID model, confidence level, input size, and ablation -- appends
 one row to a versioned CSV journal recording the configuration and resulting metrics, so the full
 experimental history is traceable and the gating-sweep figures in \cref{sec:results} (confidence,
-precision, input-size, and ablation plots) are regenerable from it; the decomposition and
-ground-truth-box numbers come from separate evaluation runs recorded in the same journal. The
+precision, input-size, and ablation plots) are regenerable from it; the ground-truth-box re-identification scores
+(\osnetGT{}/\timmGT{}/\osnetainGT{}) are the six-clip means of the \texttt{gt\_*\_gtbox} HOTA rows
+in that journal, while the detection/association decomposition of \cref{tab:decomp} is a separate
+TrackEval run on the combined MOT16 split under the default configuration. The
 sweep harness writes each result immediately and skips configurations already present, so an
 interrupted run resumes without recomputation. We also note two environment-level pitfalls that the
 journal helped surface and that we report as negative results in \cref{sec:limitations}: a NumPy-2.x

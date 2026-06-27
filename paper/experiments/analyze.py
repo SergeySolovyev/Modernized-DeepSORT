@@ -1,8 +1,9 @@
 """Build the paper figures and the numeric macros from the gating study.
 
-Reads paper/experiments/gating_study.csv (the sweep) and results/experiments.csv (detector
-precision and the decomposition), writes PDF figures to paper/figures/, prints the macro values,
-and updates the TBD entries in paper/sections/results_macros.tex.
+Reads paper/experiments/gating_study.csv (the confidence/imgsz/ablation sweep), writes the PDF
+figures to paper/figures/, prints the macro values, and updates nHurt / corrPearson /
+ablationRecover in paper/sections/results_macros.tex. Per-clip detector precision is the pinned
+imgsz-1280 measurement carried in PREC0 below (see the Reproducibility note in the paper).
 
   python paper/experiments/analyze.py        # run from the repo root
 """
@@ -130,18 +131,6 @@ def fig_imgsz_dense(g):
     save(fig, "fig_imgsz_dense.pdf")
 
 
-def fig_decomposition():
-    metrics = ["HOTA", "MOTA", "IDF1", "DetA", "AssA"]
-    base = [38.65, 46.34, 50.65, 37.85, 39.52]
-    mod = [47.68, 46.75, 52.18, 50.15, 45.77]
-    x = np.arange(len(metrics)); w = 0.38
-    fig, ax = plt.subplots(figsize=(3.4, 2.4))
-    ax.bar(x - w / 2, base, w, label="baseline", color=GRAY, edgecolor="#333", linewidth=0.4)
-    ax.bar(x + w / 2, mod, w, label="modern", color=ORANGE, edgecolor="#333", linewidth=0.4)
-    ax.set_xticks(x); ax.set_xticklabels(metrics); ax.set_ylabel("score"); ax.legend()
-    save(fig, "fig_decomposition.pdf")
-
-
 def update_macros(nhurt, r, recover):
     if not os.path.exists(MACROS):
         return
@@ -165,7 +154,6 @@ def main():
     r = fig_money_plot(g, prec)
     recover = fig_ablation(g)
     fig_imgsz_dense(g)
-    fig_decomposition()
     nhurt = sum(1 for s in SEQS
                 if (g.get((s, "conf045"), float("nan")) - g.get((s, "conf015"), float("nan"))) > 0)
     print("\n=== macros ===")

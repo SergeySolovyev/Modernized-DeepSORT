@@ -3,7 +3,8 @@
 
 We presented not a new tracker but an audit of an old one made new. Modernizing DeepSORT with a
 contemporary detector and re-identification model lifts mean HOTA from \baselineHOTA{} to
-\modernHOTA{} ($+\deltaHOTA$) at \fpsRealtime{}~FPS end-to-end (timed on MOT16-09), a result that is by
+\modernHOTA{} ($+\deltaHOTA$ tuned per clip; $+\deltaDefaultHOTA$ at the uniform default gate) at
+\fpsRealtime{}~FPS end-to-end (timed on MOT16-09), a result that is by
 itself unsurprising. The value lies in decomposing that gain and tracing its failure modes. The
 improvement is detection-dominated rather than association-dominated, and on dense, low-resolution
 clips the modernized pipeline can regress -- at its default gate it scores below the 2017 baseline on

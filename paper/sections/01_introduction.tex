@@ -11,7 +11,8 @@ unchanged SORT core. We do exactly this, integrating pluggable detectors (YOLOv8
 and re-ID models (OSNet \cite{zhou2019osnet}; a generic ImageNet timm backbone \cite{wightman2019timm})
 through a single \texttt{Detection(tlwh, confidence, feature)} contract. On six MOT-Challenge training videos
 \cite{leal2015mot15,milan2016mot16}, mean HOTA \cite{luiten2021hota,luiten2020trackeval} rises from
-\baselineHOTA{} to \modernHOTA{} ($+\deltaHOTA$); the live pipeline runs at \fpsRealtime{}~FPS
+\baselineHOTA{} to \modernHOTA{} ($+\deltaHOTA$ tuned per clip; $+\deltaDefaultHOTA$ at the uniform
+default gate); the live pipeline runs at \fpsRealtime{}~FPS
 end-to-end (timed on MOT16-09). This headline result is also
 unsurprising and, on its own, unpublishable: a stronger detector and a stronger encoder make a better
 tracker.

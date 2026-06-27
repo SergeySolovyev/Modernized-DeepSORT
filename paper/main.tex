@@ -26,7 +26,7 @@
 \input{sections/results_macros.tex}
 
 \title[english]{Precision at the Gate: Per-Clip Detector Confidence\\
-       Outranks Recall in Tracking-by-Detection}
+       Outranks Recall in a Modernized DeepSORT Pipeline}
 
 \author[english]{
 Sergei Solovev \\
@@ -43,7 +43,8 @@ HSE University \\
 \begin{abstract}
 Modernizing a 2017-era DeepSORT tracker by swapping its precomputed detections and fixed appearance
 encoder for a contemporary detector (YOLOv8m) and re-identification model (OSNet) raises mean HOTA on
-six MOT-Challenge videos from \baselineHOTA{} to \modernHOTA{} ($+\deltaHOTA$). \textbf{This headline
+six MOT-Challenge videos from \baselineHOTA{} to \modernHOTA{} ($+\deltaHOTA$ tuned per clip;
+$+\deltaDefaultHOTA$ at the uniform default gate). \textbf{This headline
 gain is unsurprising and unpublishable on its own; the contribution of this paper is the audit
 underneath it.} First, the gain is \textbf{detection-dominated}: on the MOT16 split the detection
 term rises by $\detaGain$ HOTA points against only $\assaGain$ for the association term, and under
