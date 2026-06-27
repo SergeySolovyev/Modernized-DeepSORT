@@ -105,3 +105,7 @@ results/**/*.mp4
 results/**/*.avi
 overlays/
 runs/
+
+# Secrets / credentials (NEVER commit)
+figshare.txt
+*.token
